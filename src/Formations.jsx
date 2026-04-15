@@ -1,16 +1,16 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useCallback } from "react";
+import serreHeroImg from "./images/serre2.jpg";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const WHATSAPP_NUMBER   = "33603908935";
-const PAYPAL_EMAIL      = "mandiayediallo@gmail.com";
-const WERO_NUMBER       = "06 59 01 25 99";
-const WAVE_NUMBER       = "+221 77 181 33 44";
+const WHATSAPP_NUMBER = "33603908935";
+const PAYPAL_EMAIL    = "mandiayediallo@gmail.com";
+const WERO_NUMBER     = "06 59 01 25 99";
+const WAVE_NUMBER     = "+221 77 181 33 44";
 
-// ⚠️ Colle ici l'URL de ton déploiement Google Apps Script (le même que pour la boutique)
 const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyrfnrWvErokZhGmTRGw0k39h3l1nIxYCdBcr7XxlV4SygPrCRaZEQKMnNwYdjQTuQuKw/exec";
 
 const COUNTRY_CODES = [
-   { code: "+33",  flag: "🇫🇷", label: "France"        },
+  { code: "+33",  flag: "🇫🇷", label: "France"        },
   { code: "+32",  flag: "🇧🇪", label: "Belgique"      },
   { code: "+41",  flag: "🇨🇭", label: "Suisse"        },
   { code: "+352", flag: "🇱🇺", label: "Luxembourg"    },
@@ -31,14 +31,13 @@ const COUNTRY_CODES = [
   { code: "+39",  flag: "🇮🇹", label: "Italie"        },
 ];
 
-// ─── Formations data ──────────────────────────────────────────────────────────
 const FORMATIONS = [
   {
     id:        "potager",
     emoji:     "🌱",
     titre:     "Formation Potager Maison",
     sousTitre: "Pour débutant — 2 jours en ligne",
-    formateur: "Mandiaye Diallo",
+    formateur: "Mandiaye",
     prix:      15,
     prixFCFA:  "10 000 FCFA",
     mention:   "Formation potager",
@@ -110,7 +109,6 @@ const FORMATIONS = [
   },
 ];
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
 const T = {
   green:      "#1f7a3d",
   greenDark:  "#166534",
@@ -145,14 +143,13 @@ async function sendInscriptionToSheets(payload) {
       img.onerror = resolve;
       img.src = url;
     });
-    console.log("✅ Inscription envoyée vers Google Sheets");
   } catch (err) {
     console.warn("Sheets inscription error:", err);
   }
 }
 
 // ─── Modal paiement ───────────────────────────────────────────────────────────
-function PaymentModal({ formation, customer, fullPhone, onClose, onPaymentChosen }) {
+function PaymentModal({ formation, customer, onClose, onPaymentChosen }) {
   const [selected, setSelected] = useState(null);
   const [copied,   setCopied]   = useState(false);
   const amount    = formation.prix;
@@ -194,7 +191,7 @@ function PaymentModal({ formation, customer, fullPhone, onClose, onPaymentChosen
             <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginTop: 6 }}>La Serre Africaine</div>
           </div>
           <button type="button" onClick={() => { copyWero(); onPaymentChosen("Wero"); }}
-            style={{ border: "2px solid #5b21b6", background: copied ? "#5b21b6" : T.white, color: copied ? T.white : "#5b21b6", borderRadius: 10, padding: "11px", fontWeight: "bold", cursor: "pointer", width: "100%", fontSize: 14, transition: "all 0.2s" }}>
+            style={{ border: "2px solid #5b21b6", background: copied ? "#5b21b6" : T.white, color: copied ? T.white : "#5b21b6", borderRadius: 10, padding: "11px", fontWeight: "bold", cursor: "pointer", width: "100%", fontSize: 14 }}>
             {copied ? "✓ Numéro copié !" : "📋 Copier le numéro"}
           </button>
         </>
@@ -290,7 +287,7 @@ function PaymentModal({ formation, customer, fullPhone, onClose, onPaymentChosen
   );
 }
 
-// ─── Confirmation page inscription ────────────────────────────────────────────
+// ─── Confirmation inscription ─────────────────────────────────────────────────
 function ConfirmationInscription({ formation, customer, fullPhone, email, onBack }) {
   const [showPayment,   setShowPayment]   = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
@@ -303,7 +300,7 @@ function ConfirmationInscription({ formation, customer, fullPhone, email, onBack
 
   const handleWAClick = useCallback(async () => {
     if (sheetSent) return;
-    const payload = {
+    await sendInscriptionToSheets({
       formation:     formation.titre,
       formationId:   formation.id,
       nom:           customer.nom,
@@ -314,8 +311,7 @@ function ConfirmationInscription({ formation, customer, fullPhone, email, onBack
       prix:          formation.prix,
       prixFCFA:      formation.prixFCFA,
       paymentMethod: paymentMethod || "Non renseigné",
-    };
-    await sendInscriptionToSheets(payload);
+    });
     setSheetSent(true);
   }, [sheetSent, formation, customer, email, fullPhone, paymentMethod]);
 
@@ -325,17 +321,14 @@ function ConfirmationInscription({ formation, customer, fullPhone, email, onBack
         <PaymentModal
           formation={formation}
           customer={customer}
-          fullPhone={fullPhone}
           onClose={() => setShowPayment(false)}
           onPaymentChosen={(m) => { setPaymentMethod(m); setShowPayment(false); }}
         />
       )}
-
       <div style={{ background: T.green, color: T.white, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
         <button type="button" onClick={onBack} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: T.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontWeight: "bold", fontSize: 13 }}>← Retour</button>
         <h1 style={{ margin: 0, fontSize: 18, fontWeight: "bold" }}>Confirmation d'inscription</h1>
       </div>
-
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "24px 16px" }}>
         <div style={{ ...card, marginBottom: 20, textAlign: "center" }}>
           <div style={{ fontSize: 52, marginBottom: 10 }}>✅</div>
@@ -360,12 +353,7 @@ function ConfirmationInscription({ formation, customer, fullPhone, email, onBack
 
         <div style={{ ...card, marginBottom: 16 }}>
           <h3 style={{ color: T.greenDark, margin: "0 0 14px", fontSize: 17 }}>👤 Vos informations</h3>
-          {[
-            ["Nom",       `${customer.prenom} ${customer.nom}`],
-            ["Email",     email],
-            ["Téléphone", fullPhone],
-            ["Pays",      customer.pays],
-          ].map(([l, v]) => (
+          {[["Nom", `${customer.prenom} ${customer.nom}`], ["Email", email], ["Téléphone", fullPhone], ["Pays", customer.pays]].map(([l, v]) => (
             <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: `1px solid ${T.border}`, fontSize: 14 }}>
               <span style={{ color: T.gray }}>{l}</span><span style={{ fontWeight: "bold" }}>{v}</span>
             </div>
@@ -379,30 +367,15 @@ function ConfirmationInscription({ formation, customer, fullPhone, email, onBack
           </div>
         </div>
 
-        <div style={{ ...card, marginBottom: 20 }}>
-          <h3 style={{ color: T.greenDark, margin: "0 0 16px", fontSize: 17 }}>📋 Prochaines étapes</h3>
-          {[
-            { num: "1", title: "Confirmer sur WhatsApp",  desc: "Votre inscription est enregistrée dans notre tableau de suivi.", color: T.greenLight },
-            { num: "2", title: "Régler votre inscription", desc: "Choisissez votre mode de paiement et indiquez la mention obligatoire.", color: "#e0f2fe" },
-            { num: "3", title: "Confirmation sous 48h",   desc: "Vous recevrez un email/SMS de confirmation de votre place.", color: T.amberLight },
-            { num: "4", title: "Lien de session",         desc: "Le lien d'accès vous sera envoyé une semaine avant la formation.", color: "#f3e8ff" },
-          ].map((step) => (
-            <div key={step.num} style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 14 }}>
-              <div style={{ width: 34, height: 34, borderRadius: "50%", background: step.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", color: T.greenDark, flexShrink: 0, fontSize: 15 }}>{step.num}</div>
-              <div><div style={{ fontWeight: "bold", fontSize: 14, marginBottom: 2 }}>{step.title}</div><div style={{ color: T.gray, fontSize: 13 }}>{step.desc}</div></div>
-            </div>
-          ))}
-        </div>
-
         <div style={{ display: "grid", gap: 12 }}>
           <a href={waUrl} target="_blank" rel="noreferrer" onClick={handleWAClick}>
-            <button type="button" style={{ background: "#25D366", color: T.white, border: "none", borderRadius: 14, padding: "16px", fontSize: 16, fontWeight: "bold", cursor: "pointer", width: "100%", boxShadow: "0 6px 18px rgba(37,211,102,0.28)" }}>
+            <button type="button" style={{ background: "#25D366", color: T.white, border: "none", borderRadius: 14, padding: "16px", fontSize: 16, fontWeight: "bold", cursor: "pointer", width: "100%" }}>
               1️⃣ Confirmer sur WhatsApp
               {sheetSent && <span style={{ fontSize: 12, opacity: 0.85, marginLeft: 8 }}>✓ enregistré</span>}
             </button>
           </a>
           <button type="button" onClick={() => setShowPayment(true)}
-            style={{ background: T.green, color: T.white, border: "none", borderRadius: 14, padding: "16px", fontSize: 16, fontWeight: "bold", cursor: "pointer", width: "100%", boxShadow: "0 6px 18px rgba(31,122,61,0.22)" }}>
+            style={{ background: T.green, color: T.white, border: "none", borderRadius: 14, padding: "16px", fontSize: 16, fontWeight: "bold", cursor: "pointer", width: "100%" }}>
             2️⃣ Payer mon inscription ({formation.prix} €)
             {paymentMethod && <span style={{ fontSize: 13, opacity: 0.85, marginLeft: 8 }}>— {paymentMethod}</span>}
           </button>
@@ -422,7 +395,7 @@ function ValidatedInput({ placeholder, value, onChange, validate, type = "text" 
       <input type={type} placeholder={placeholder} value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={() => setTouched(true)}
-        style={{ padding: "11px 36px 11px 12px", fontSize: 14, borderRadius: 8, border: `1.5px solid ${borderColor}`, width: "100%", background: T.white, boxSizing: "border-box", transition: "border-color 0.2s" }} />
+        style={{ padding: "11px 36px 11px 12px", fontSize: 14, borderRadius: 8, border: `1.5px solid ${borderColor}`, width: "100%", background: T.white, boxSizing: "border-box" }} />
       {isValid !== null && (
         <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: isValid ? "#22c55e" : "#ef4444", fontSize: 16, fontWeight: "bold" }}>
           {isValid ? "✓" : "✗"}
@@ -432,80 +405,15 @@ function ValidatedInput({ placeholder, value, onChange, validate, type = "text" 
   );
 }
 
-// ─── Carte formation ──────────────────────────────────────────────────────────
-function FormationCard({ formation, onSelect }) {
-  const [expanded, setExpanded] = useState(false);
-  return (
-    <div style={{ ...card, border: `2px solid ${formation.border}`, background: formation.bg, position: "relative" }}>
-      <div style={{ marginBottom: 14 }}>
-        <h2 style={{ margin: "0 0 4px", color: formation.couleur, fontSize: 22, fontWeight: "bold" }}>
-          {formation.emoji} {formation.titre}
-        </h2>
-        <p style={{ margin: "0 0 8px", color: T.gray, fontSize: 14, fontWeight: "bold" }}>{formation.sousTitre}</p>
-        <div style={{ fontSize: 13, color: T.gray }}>👨‍🏫 <strong>{formation.formateur}</strong></div>
-      </div>
-
-      {/* Info dates/horaires */}
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-        <div style={{ background: T.white, border: `1px solid ${formation.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 13 }}>
-          📅 <strong>Prochaines dates à annoncer</strong>
-        </div>
-        <div style={{ background: T.white, border: `1px solid ${formation.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 13 }}>
-          ⏰ <strong>20h GMT → 22h GMT</strong>
-        </div>
-        <div style={{ background: T.white, border: `1px solid ${formation.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 13 }}>
-          🌐 <strong>En ligne · En français</strong>
-        </div>
-      </div>
-
-      {/* Prix */}
-      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-        <span style={{ fontSize: 32, fontWeight: "bold", color: formation.couleur }}>{formation.prix} €</span>
-        <div>
-          <div style={{ fontSize: 13, color: T.gray }}>ou {formation.prixFCFA}</div>
-          <div style={{ fontSize: 12, color: T.gray }}>2 jours + documents inclus</div>
-        </div>
-      </div>
-
-      {/* Programme accordéon */}
-      <button type="button" onClick={() => setExpanded(!expanded)}
-        style={{ background: "none", border: `1px solid ${formation.border}`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 13, color: formation.couleur, fontWeight: "bold", marginBottom: 14, width: "100%" }}>
-        {expanded ? "▲ Masquer le programme" : "▼ Voir le programme complet"}
-      </button>
-
-      {expanded && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 16 }}>
-          {formation.programme.map((jour) => (
-            <div key={jour.jour} style={{ background: T.white, borderRadius: 10, padding: 14, border: `1px solid ${formation.border}` }}>
-              <div style={{ fontWeight: "bold", color: formation.couleur, marginBottom: 8, fontSize: 14 }}>📌 {jour.jour}</div>
-              {jour.items.map((item) => (
-                <div key={item} style={{ display: "flex", gap: 8, fontSize: 13, color: T.gray, marginBottom: 5 }}>
-                  <span style={{ color: formation.couleur, flexShrink: 0 }}>✓</span>{item}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <button type="button" onClick={() => onSelect(formation)}
-        style={{ border: "none", background: formation.couleur, color: T.white, borderRadius: 12, padding: "14px 20px", fontWeight: "bold", cursor: "pointer", width: "100%", fontSize: 16, boxShadow: `0 6px 18px ${formation.couleur}40` }}>
-        Je m'inscris à cette formation →
-      </button>
-    </div>
-  );
-}
-
 // ─── Formulaire inscription ───────────────────────────────────────────────────
 function FormulaireInscription({ formation, onBack, onConfirm }) {
-  const [customer,     setCustomer]     = useState({ nom: "", prenom: "", pays: "France" });
-  const [email,        setEmail]        = useState("");
-  const [countryCode,  setCountryCode]  = useState("+33");
-  const [phoneNumber,  setPhoneNumber]  = useState("");
+  const [customer,    setCustomer]    = useState({ nom: "", prenom: "", pays: "France" });
+  const [email,       setEmail]       = useState("");
+  const [countryCode, setCountryCode] = useState("+33");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const fullPhone = `${countryCode} ${phoneNumber}`;
-
-  const isValid = customer.nom.trim().length >= 2 &&
+  const isValid   = customer.nom.trim().length >= 2 &&
     customer.prenom.trim().length >= 2 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
     phoneNumber.replace(/\D/g, "").length >= 7;
@@ -522,7 +430,6 @@ function FormulaireInscription({ formation, onBack, onConfirm }) {
           <h2 style={{ color: formation.couleur, margin: "8px 0 4px" }}>{formation.titre}</h2>
           <div style={{ fontSize: 22, fontWeight: "bold", color: formation.couleur }}>{formation.prix} € <span style={{ fontSize: 14, color: T.gray }}>/ {formation.prixFCFA}</span></div>
         </div>
-
         <div style={card}>
           <h3 style={{ color: T.greenDark, margin: "0 0 16px" }}>📋 Vos informations</h3>
           <div style={{ display: "grid", gap: 12 }}>
@@ -530,8 +437,6 @@ function FormulaireInscription({ formation, onBack, onConfirm }) {
             <ValidatedInput placeholder="Nom" value={customer.nom} onChange={(v) => setCustomer(p => ({ ...p, nom: v }))} validate={(v) => v.trim().length >= 2} />
             <ValidatedInput placeholder="Email" type="email" value={email} onChange={setEmail} validate={(v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)} />
             <ValidatedInput placeholder="Pays" value={customer.pays} onChange={(v) => setCustomer(p => ({ ...p, pays: v }))} validate={(v) => v.trim().length >= 2} />
-
-            {/* Téléphone */}
             <div style={{ display: "flex", gap: 8 }}>
               <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}
                 style={{ padding: "11px 8px", fontSize: 14, borderRadius: 8, border: "1.5px solid #cbd5e1", background: T.white, flexShrink: 0, width: 130 }}>
@@ -541,19 +446,14 @@ function FormulaireInscription({ formation, onBack, onConfirm }) {
                 onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
                 style={{ padding: "11px 12px", fontSize: 14, borderRadius: 8, border: "1.5px solid #cbd5e1", flex: 1, background: T.white }} />
             </div>
-
-            {phoneNumber && (
-              <div style={{ fontSize: 13, color: T.greenDark, fontWeight: "bold" }}>📞 Numéro complet : {fullPhone}</div>
-            )}
+            {phoneNumber && <div style={{ fontSize: 13, color: T.greenDark, fontWeight: "bold" }}>📞 Numéro complet : {fullPhone}</div>}
           </div>
-
           <div style={{ background: T.amberLight, border: "1px solid #fcd34d", borderRadius: 10, padding: "10px 14px", marginTop: 16, fontSize: 13, color: T.amber }}>
             ⚠️ N'oubliez pas d'indiquer <strong>"{formation.mention}"</strong> dans le sujet de votre paiement.
           </div>
-
           <button type="button"
             onClick={() => isValid && onConfirm(formation, customer, fullPhone, email)}
-            style={{ border: "none", background: isValid ? formation.couleur : "#d1d5db", color: T.white, borderRadius: 12, padding: "15px 16px", fontSize: 15, fontWeight: "bold", cursor: isValid ? "pointer" : "not-allowed", width: "100%", marginTop: 16, boxShadow: isValid ? `0 6px 18px ${formation.couleur}30` : "none" }}>
+            style={{ border: "none", background: isValid ? formation.couleur : "#d1d5db", color: T.white, borderRadius: 12, padding: "15px 16px", fontSize: 15, fontWeight: "bold", cursor: isValid ? "pointer" : "not-allowed", width: "100%", marginTop: 16 }}>
             Voir le récapitulatif →
           </button>
         </div>
@@ -562,37 +462,73 @@ function FormulaireInscription({ formation, onBack, onConfirm }) {
   );
 }
 
+// ─── Carte formation ──────────────────────────────────────────────────────────
+function FormationCard({ formation, onSelect }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div style={{ ...card, border: `2px solid ${formation.border}`, background: formation.bg }}>
+      <h2 style={{ margin: "0 0 4px", color: formation.couleur, fontSize: 22, fontWeight: "bold" }}>
+        {formation.emoji} {formation.titre}
+      </h2>
+      <p style={{ margin: "0 0 8px", color: T.gray, fontSize: 14, fontWeight: "bold" }}>{formation.sousTitre}</p>
+      <div style={{ fontSize: 13, color: T.gray, marginBottom: 14 }}>👨‍🏫 <strong>{formation.formateur}</strong></div>
+
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+        {["📅 Prochaines dates à annoncer", "⏰ 20h GMT → 22h GMT", "🌐 En ligne · En français"].map((tag) => (
+          <div key={tag} style={{ background: T.white, border: `1px solid ${formation.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12 }}>{tag}</div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+        <span style={{ fontSize: 32, fontWeight: "bold", color: formation.couleur }}>{formation.prix} €</span>
+        <div>
+          <div style={{ fontSize: 13, color: T.gray }}>ou {formation.prixFCFA}</div>
+          <div style={{ fontSize: 12, color: T.gray }}>2 jours + documents inclus</div>
+        </div>
+      </div>
+
+      <button type="button" onClick={() => setExpanded(!expanded)}
+        style={{ background: "none", border: `1px solid ${formation.border}`, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontSize: 13, color: formation.couleur, fontWeight: "bold", marginBottom: 14, width: "100%" }}>
+        {expanded ? "▲ Masquer le programme" : "▼ Voir le programme complet"}
+      </button>
+
+      {expanded && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
+          {formation.programme.map((jour) => (
+            <div key={jour.jour} style={{ background: T.white, borderRadius: 10, padding: 14, border: `1px solid ${formation.border}` }}>
+              <div style={{ fontWeight: "bold", color: formation.couleur, marginBottom: 8, fontSize: 14 }}>📌 {jour.jour}</div>
+              {jour.items.map((item) => (
+                <div key={item} style={{ display: "flex", gap: 8, fontSize: 13, color: T.gray, marginBottom: 5 }}>
+                  <span style={{ color: formation.couleur, flexShrink: 0 }}>✓</span>{item}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <button type="button" onClick={() => onSelect(formation)}
+        style={{ border: "none", background: formation.couleur, color: T.white, borderRadius: 12, padding: "14px 20px", fontWeight: "bold", cursor: "pointer", width: "100%", fontSize: 16 }}>
+        Je m'inscris à cette formation →
+      </button>
+    </div>
+  );
+}
+
 // ─── Page principale Formations ───────────────────────────────────────────────
 export default function Formations({ onNavigateBoutique }) {
-  const [step,          setStep]          = useState("liste"); // liste | formulaire | confirmation
-  const [selectedForm,  setSelectedForm]  = useState(null);
-  const [customer,      setCustomer]      = useState(null);
-  const [fullPhone,     setFullPhone]     = useState("");
-  const [email,         setEmail]         = useState("");
+  const [step,         setStep]         = useState("liste");
+  const [selectedForm, setSelectedForm] = useState(null);
+  const [customer,     setCustomer]     = useState(null);
+  const [fullPhone,    setFullPhone]    = useState("");
+  const [email,        setEmail]        = useState("");
 
-  const handleSelectFormation = (formation) => {
-    setSelectedForm(formation);
-    setStep("formulaire");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const handleSelectFormation = (f) => { setSelectedForm(f); setStep("formulaire"); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const handleConfirm = (f, c, phone, mail) => { setCustomer(c); setFullPhone(phone); setEmail(mail); setStep("confirmation"); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
-  const handleConfirm = (formation, cust, phone, mail) => {
-    setCustomer(cust);
-    setFullPhone(phone);
-    setEmail(mail);
-    setStep("confirmation");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  if (step === "formulaire")   return <FormulaireInscription formation={selectedForm} onBack={() => setStep("liste")} onConfirm={handleConfirm} />;
+  if (step === "confirmation") return <ConfirmationInscription formation={selectedForm} customer={customer} fullPhone={fullPhone} email={email} onBack={() => setStep("formulaire")} />;
 
-  if (step === "formulaire") {
-    return <FormulaireInscription formation={selectedForm} onBack={() => setStep("liste")} onConfirm={handleConfirm} />;
-  }
-
-  if (step === "confirmation") {
-    return <ConfirmationInscription formation={selectedForm} customer={customer} fullPhone={fullPhone} email={email} onBack={() => setStep("formulaire")} />;
-  }
-
-  // ── Page liste ──
   return (
     <>
       <style>{`
@@ -605,10 +541,10 @@ export default function Formations({ onNavigateBoutique }) {
       <header style={{ background: T.green, color: T.white, padding: "15px 16px", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: "bold", letterSpacing: "-0.3px" }}>LA SERRE AFRICAINE</h1>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: "bold" }}>LA SERRE AFRICAINE</h1>
             <p style={{ margin: 0, opacity: 0.85, fontSize: 12 }}>Formations Potager & Maraîchage BIO 🌱</p>
           </div>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 10 }}>
             <button type="button" onClick={onNavigateBoutique}
               style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: T.white, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", cursor: "pointer", fontSize: 13 }}>
               🛒 Boutique
@@ -620,21 +556,39 @@ export default function Formations({ onNavigateBoutique }) {
         </div>
       </header>
 
-      {/* Hero */}
-      <section style={{ background: `linear-gradient(135deg, ${T.green}, #2f9e44)`, color: T.white, padding: "40px 16px" }}>
-        <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontSize: 11, fontWeight: "bold", letterSpacing: 2, opacity: 0.75, marginBottom: 12, textTransform: "uppercase" }}>Formations en ligne · En français</div>
-          <h2 style={{ margin: "0 0 16px", fontSize: 36, lineHeight: 1.1, fontWeight: "bold" }}>🌱 Formations Potager & Maraîchage BIO</h2>
-          <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 24, opacity: 0.95, maxWidth: 640, margin: "0 auto 24px" }}>
+      {/* ── PHOTO HERO ── */}
+      <div style={{ width: "100%", height: 420, overflow: "hidden", position: "relative" }}>
+        <img
+          src={serreHeroImg}
+          alt="Mandiaye dans son potager"
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%" }}
+        />
+        {/* Overlay dégradé bas */}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.55))" }} />
+        <div style={{ position: "absolute", bottom: 24, left: 0, right: 0, textAlign: "center", color: T.white, padding: "0 16px" }}>
+          <div style={{ fontSize: 13, fontWeight: "bold", letterSpacing: 2, opacity: 0.9, marginBottom: 8, textTransform: "uppercase" }}>Formations en ligne · En français</div>
+          <h2 style={{ margin: 0, fontSize: 32, fontWeight: "bold", lineHeight: 1.2, textShadow: "0 2px 8px rgba(0,0,0,0.4)" }}>
+            🌱 Formations Potager & Maraîchage BIO
+          </h2>
+        </div>
+      </div>
+
+      {/* Hero texte */}
+      <section style={{ background: `linear-gradient(135deg, ${T.green}, #2f9e44)`, color: T.white, padding: "32px 16px", textAlign: "center" }}>
+        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+          <p style={{ fontSize: 16, lineHeight: 1.8, marginBottom: 16, opacity: 0.95 }}>
             Tout ce que je partage vient du terrain. De la terre. Des mains sales, des essais ratés, des réussites qui donnent le sourire.
-            Depuis le jour où j'ai goûté mes premières carottes cultivées à quelques mètres de la maison — <strong>la terre m'a changé.</strong>
+            De ce moment inoubliable où j'ai goûté mes premières carottes cultivées à quelques mètres de la maison.
           </p>
-          <p style={{ fontSize: 15, lineHeight: 1.7, opacity: 0.9, maxWidth: 600, margin: "0 auto 28px" }}>
+          <p style={{ fontSize: 15, lineHeight: 1.75, marginBottom: 24, opacity: 0.9 }}>
+            Je suis Mandiaye — amateur potagiste, passionné de la terre et du partage.
+            Fondateur de La Serre Africaine, je partage aussi ma passion sur TikTok
+            <strong> @lepotagerdemandiaye</strong> avec plus de <strong>55 000 abonnés</strong>.
             Aujourd'hui, j'ai envie de transmettre ce changement — avec simplicité, vérité et pratique.
           </p>
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-            {["🌍 Accessible partout dans le monde", "🇫🇷 En français", "📱 En ligne (Zoom/Meet)", "📄 Documents inclus"].map((r) => (
-              <div key={r} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 999, padding: "8px 16px", fontSize: 13, fontWeight: "bold" }}>{r}</div>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+            {["🌍 Accessible partout", "🇫🇷 En français", "📱 En ligne", "📄 Documents inclus", "🎵 TikTok +55K abonnés"].map((r) => (
+              <div key={r} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 999, padding: "7px 14px", fontSize: 13, fontWeight: "bold" }}>{r}</div>
             ))}
           </div>
         </div>
@@ -645,42 +599,47 @@ export default function Formations({ onNavigateBoutique }) {
         <div style={{ maxWidth: 800, margin: "0 auto" }}>
           <h3 style={{ color: T.greenDark, textAlign: "center", margin: "0 0 16px", fontSize: 18 }}>👨‍🏫 Vos formateurs</h3>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-            {[
-              { emoji: "🌱", nom: "Mandiaye Diallo", role: "Formation Potager Maison", desc: "Fondateur de La Serre Africaine. Passionné de jardinage et de cultures africaines en France. Il partage son expérience du terrain avec authenticité." },
-              { emoji: "🌿", nom: "Sébastien",       role: "Formation Maraîchage BIO", desc: "Professionnel du BIO, professeur en université agricole. Passionné et exigeant, il vous accompagne avec rigueur sur le maraîchage professionnel." },
-            ].map((f) => (
-              <div key={f.nom} style={{ background: T.greenLight, borderRadius: 12, padding: 16, border: `1px solid ${T.greenBorder}` }}>
-                <div style={{ fontSize: 30, marginBottom: 8 }}>{f.emoji}</div>
-                <div style={{ fontWeight: "bold", fontSize: 16, color: T.greenDark }}>{f.nom}</div>
-                <div style={{ fontSize: 13, color: T.green, fontWeight: "bold", marginBottom: 6 }}>{f.role}</div>
-                <div style={{ fontSize: 13, color: T.gray, lineHeight: 1.6 }}>{f.desc}</div>
+            <div style={{ background: T.greenLight, borderRadius: 12, padding: 16, border: `1px solid ${T.greenBorder}` }}>
+              <div style={{ fontSize: 28, marginBottom: 8 }}>🌱</div>
+              <div style={{ fontWeight: "bold", fontSize: 16, color: T.greenDark }}>Mandiaye</div>
+              <div style={{ fontSize: 13, color: T.green, fontWeight: "bold", marginBottom: 8 }}>Formation Potager Maison</div>
+              <div style={{ fontSize: 13, color: T.gray, lineHeight: 1.7 }}>
+                Fondateur de La Serre Africaine. Amateur potagiste passionné de la terre et du partage.
+                Créateur de la page TikTok <strong>@lepotagerdemandiaye</strong> — plus de <strong>55 000 abonnés</strong> —
+                où il partage au quotidien sa passion du jardin et des cultures africaines en France.
               </div>
-            ))}
+            </div>
+            <div style={{ background: "#eff6ff", borderRadius: 12, padding: 16, border: "1px solid #bfdbfe" }}>
+              <div style={{ fontSize: 28, marginBottom: 8 }}>🌿</div>
+              <div style={{ fontWeight: "bold", fontSize: 16, color: "#1e40af" }}>Sébastien</div>
+              <div style={{ fontSize: 13, color: "#1e40af", fontWeight: "bold", marginBottom: 8 }}>Formation Maraîchage BIO</div>
+              <div style={{ fontSize: 13, color: T.gray, lineHeight: 1.7 }}>
+                Professionnel du BIO, professeur en université agricole.
+                Passionné et exigeant, il intervient sur le maraîchage professionnel avec rigueur et bienveillance.
+                <strong> Autant dire que tu seras entre de très bonnes mains.</strong>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Formations */}
-      <section style={{ padding: "32px 16px" }}>
+      <section style={{ padding: "32px 16px", background: T.bg }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <h2 style={{ color: T.greenDark, textAlign: "center", margin: "0 0 8px", fontSize: 28, fontWeight: "bold" }}>Nos formations</h2>
           <p style={{ color: T.gray, textAlign: "center", margin: "0 0 28px", fontSize: 15 }}>2 jours de formation intensive + documents inclus</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 24 }}>
-            {FORMATIONS.map((f) => (
-              <FormationCard key={f.id} formation={f} onSelect={handleSelectFormation} />
-            ))}
+            {FORMATIONS.map((f) => <FormationCard key={f.id} formation={f} onSelect={handleSelectFormation} />)}
           </div>
 
-          {/* Pack duo */}
+          {/* Pack Duo */}
           <div style={{ marginTop: 24, background: "linear-gradient(135deg, #1f7a3d, #1e40af)", borderRadius: 18, padding: 28, color: T.white, textAlign: "center" }}>
             <h3 style={{ margin: "0 0 8px", fontSize: 22 }}>🎓 Pack Duo — Les 2 formations</h3>
             <p style={{ opacity: 0.9, margin: "0 0 16px", fontSize: 15 }}>Potager Maison + Maraîchage BIO — 4 jours complets</p>
-            <div style={{ fontSize: 32, fontWeight: "bold", marginBottom: 8 }}>
-              60 € <span style={{ fontSize: 16, opacity: 0.8 }}>au lieu de 60 €</span>
-            </div>
+            <div style={{ fontSize: 32, fontWeight: "bold", marginBottom: 4 }}>60 €</div>
             <div style={{ fontSize: 14, opacity: 0.8, marginBottom: 20 }}>40 000 FCFA</div>
             <div style={{ background: T.amberLight, color: T.amber, borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: "bold", display: "inline-block", marginBottom: 16 }}>
-              Mention paiement : "Formations potager et maraîchage"
+              Mention : "Formations potager et maraîchage"
             </div>
             <br />
             <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Bonjour Mandiaye,\n\nJe souhaite m'inscrire au Pack Duo (Potager Maison + Maraîchage BIO).\nMontant : 60 €\n\nMerci !")}`}
@@ -699,10 +658,10 @@ export default function Formations({ onNavigateBoutique }) {
           <h2 style={{ color: T.greenDark, textAlign: "center", margin: "0 0 20px", fontSize: 24, fontWeight: "bold" }}>💳 Modes de paiement acceptés</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
             {[
-              { icon: "🅿️", label: "PayPal",       desc: "Lien automatique",       color: "#003087", bg: "#e8f0fe" },
-              { icon: "💜", label: "Wero",          desc: "Numéro à copier",        color: "#5b21b6", bg: "#f5f3ff" },
-              { icon: "📱", label: "Wave Sénégal",  desc: "+221 77 181 33 44",      color: "#0369a1", bg: "#e0f2fe" },
-              { icon: "🏦", label: "Virement SEPA", desc: "Coordonnées bancaires",  color: T.green,   bg: T.greenLight },
+              { icon: "🅿️", label: "PayPal",       desc: "Lien automatique",      color: "#003087", bg: "#e8f0fe" },
+              { icon: "💜", label: "Wero",          desc: "Numéro à copier",       color: "#5b21b6", bg: "#f5f3ff" },
+              { icon: "📱", label: "Wave Sénégal",  desc: "+221 77 181 33 44",     color: "#0369a1", bg: "#e0f2fe" },
+              { icon: "🏦", label: "Virement SEPA", desc: "Coordonnées bancaires", color: T.green,   bg: T.greenLight },
             ].map((m) => (
               <div key={m.label} style={{ border: `1px solid ${T.border}`, borderRadius: 12, padding: 14, textAlign: "center", background: m.bg }}>
                 <div style={{ fontSize: 26, marginBottom: 6 }}>{m.icon}</div>
@@ -712,7 +671,7 @@ export default function Formations({ onNavigateBoutique }) {
             ))}
           </div>
           <div style={{ background: T.amberLight, border: "1px solid #fcd34d", borderRadius: 12, padding: 16, textAlign: "center" }}>
-            <div style={{ fontWeight: "bold", color: T.amber, marginBottom: 6, fontSize: 15 }}>⚠️ Mention obligatoire dans votre paiement</div>
+            <div style={{ fontWeight: "bold", color: T.amber, marginBottom: 8, fontSize: 14 }}>⚠️ Mention obligatoire dans votre paiement</div>
             <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
               {["Formation potager", "Formation maraîchage", "Formations potager et maraîchage"].map((m) => (
                 <span key={m} style={{ background: T.white, border: "1px solid #fcd34d", borderRadius: 8, padding: "4px 10px", fontFamily: "monospace", fontSize: 13, color: T.amber, fontWeight: "bold" }}>"{m}"</span>
@@ -729,9 +688,9 @@ export default function Formations({ onNavigateBoutique }) {
           {[
             { q: "Les formations sont-elles en présentiel ou en ligne ?", r: "Entièrement en ligne (Zoom ou Google Meet). Vous pouvez participer depuis n'importe quel pays." },
             { q: "Est-ce que je reçois des documents ?", r: "Oui ! Des supports de formation sont inclus dans le prix et vous seront envoyés avant le début de la formation." },
-            { q: "Quand seront annoncées les prochaines dates ?", r: "Les dates seront publiées prochainement. Inscrivez-vous maintenant pour réserver votre place, et vous serez informé dès l'annonce." },
+            { q: "Quand seront annoncées les prochaines dates ?", r: "Les dates seront publiées prochainement. Inscrivez-vous maintenant pour réserver votre place." },
             { q: "Que faire si mon mode de paiement ne convient pas ?", r: "Écrivez directement sur WhatsApp au +33 6 03 90 89 35, Mandiaye trouvera une solution avec vous." },
-            { q: "Puis-je m'inscrire aux deux formations ?", r: "Oui ! Le Pack Duo (60 €) vous donne accès aux deux formations. Indiquez \"Formations potager et maraîchage\" dans votre paiement." },
+            { q: "Puis-je m'inscrire aux deux formations ?", r: "Oui ! Le Pack Duo (60 €) vous donne accès aux deux formations." },
           ].map((faq, i) => (
             <div key={i} style={{ background: T.white, borderRadius: 12, padding: 16, marginBottom: 10, border: `1px solid ${T.border}` }}>
               <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 6, fontSize: 14 }}>❓ {faq.q}</div>
@@ -757,7 +716,9 @@ export default function Formations({ onNavigateBoutique }) {
             </button>
           </a>
         </div>
-        <p style={{ opacity: 0.7, marginTop: 16, fontSize: 13 }}>Je serai là pour t'accompagner, répondre à tes questions, et partager ce que la terre m'a appris — sincèrement, simplement, INSHALLAH. 🌿</p>
+        <p style={{ opacity: 0.7, marginTop: 16, fontSize: 13 }}>
+          Je serai là pour t'accompagner, répondre à tes questions, et partager ce que la terre m'a appris — sincèrement, simplement, INSHALLAH. 🌿
+        </p>
       </section>
 
       <footer style={{ textAlign: "center", color: T.gray, padding: "20px 16px", fontSize: 13, background: T.white }}>
