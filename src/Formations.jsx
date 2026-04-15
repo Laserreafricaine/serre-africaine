@@ -10,7 +10,7 @@ const WAVE_NUMBER       = "+221 77 181 33 44";
 const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyrfnrWvErokZhGmTRGw0k39h3l1nIxYCdBcr7XxlV4SygPrCRaZEQKMnNwYdjQTuQuKw/exec";
 
 const COUNTRY_CODES = [
-  { code: "+33",  flag: "🇫🇷", label: "France"        },
+   { code: "+33",  flag: "🇫🇷", label: "France"        },
   { code: "+32",  flag: "🇧🇪", label: "Belgique"      },
   { code: "+41",  flag: "🇨🇭", label: "Suisse"        },
   { code: "+352", flag: "🇱🇺", label: "Luxembourg"    },
