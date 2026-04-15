@@ -955,12 +955,7 @@ export default function App() {
     return () => window.removeEventListener("popstate", handlePop);
   }, []);
 
-  // ─── Page Formations ───────────────────────────────────────────────────────
-  if (currentPage === "formations") {
-    return <Formations onNavigateBoutique={() => navigateTo("boutique")} />;
-  }
-
-  // ─── Page Boutique ─────────────────────────────────────────────────────────
+  // ─── Hooks boutique — TOUJOURS appelés avant tout return conditionnel ────────
   const cart = useCart();
   const [customer,         setCustomer]         = useState({ nom: "", prenom: "", adresse: "", codePostal: "", ville: "", pays: "France" });
   const [countryCode,      setCountryCode]      = useState("+33");
@@ -992,6 +987,11 @@ export default function App() {
     ].every(Boolean);
     return !fieldsOk || phoneNumber.replace(/\D/g, "").length < 7;
   }, [customer, phoneNumber]);
+
+  // ─── Returns conditionnels APRÈS tous les hooks ────────────────────────────
+  if (currentPage === "formations") {
+    return <Formations onNavigateBoutique={() => navigateTo("boutique")} />;
+  }
 
   if (showConfirmation) {
     return <ConfirmationPage cart={cart} customer={customer} fullPhone={fullPhone} onBack={() => setShowConfirmation(false)} />;
