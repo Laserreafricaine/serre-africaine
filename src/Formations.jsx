@@ -546,7 +546,7 @@ export default function Formations({ onNavigateBoutique }) {
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             <button type="button" onClick={onNavigateBoutique}
-              style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: T.white, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", cursor: "pointer", fontSize: 13 }}>
+              style={{ background: T.white, color: T.greenDark, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", cursor: "pointer", fontSize: 13, border: "none" }}>
               🛒 Boutique
             </button>
             <div style={{ background: T.white, color: T.greenDark, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", fontSize: 13 }}>

@@ -1026,7 +1026,7 @@ export default function App() {
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             {cart.subtotal > 0 && <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 999, padding: "8px 14px", fontSize: 14, fontWeight: "bold" }}>🛒 {cart.grandTotal.toFixed(2)} €</div>}
             <button type="button" onClick={() => navigateTo("formations")}
-              style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: T.white, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", cursor: "pointer", fontSize: 13 }}>
+              style={{ background: T.white, color: T.greenDark, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", cursor: "pointer", fontSize: 13, border: "none" }}>
               📚 Formations
             </button>
             <a href="#commande" style={{ background: T.white, color: T.greenDark, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", textDecoration: "none", fontSize: 13 }}>Commander</a>
@@ -1077,6 +1077,23 @@ export default function App() {
                     onIncrement={() => cart.updatePack(pack.id, 1)}
                     onAdd={() => handleAddPack(pack.id)} />
                 ))}
+              </div>
+            </div>
+          </Section>
+
+          <Section>
+            <div onClick={() => navigateTo("formations")} style={{ background: "#1e40af", color: "#fff", borderRadius: 18, padding: "22px 28px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontSize: 11, opacity: 0.75, letterSpacing: 2, marginBottom: 6, fontWeight: "bold", textTransform: "uppercase" }}>Envie d'aller plus loin ?</div>
+                <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 6 }}>📚 Apprenez à cultiver ces légumes !</div>
+                <div style={{ fontSize: 13, opacity: 0.9, lineHeight: 1.6 }}>Formations Potager & Maraîchage BIO · En ligne · En français · Avec Mandiaye & Sébastien</div>
+              </div>
+              <div style={{ textAlign: "center", flexShrink: 0 }}>
+                <div style={{ fontSize: 28, fontWeight: "bold", color: "#fbbf24" }}>dès 15 €</div>
+                <div style={{ fontSize: 11, opacity: 0.75, marginBottom: 10 }}>10 000 FCFA</div>
+                <div style={{ background: "#fff", color: "#1e40af", borderRadius: 999, padding: "10px 20px", fontWeight: "bold", fontSize: 14, display: "inline-block" }}>
+                  Voir les formations →
+                </div>
               </div>
             </div>
           </Section>
@@ -1193,8 +1210,15 @@ export default function App() {
         </div>
       </section>
 
-      <footer style={{ textAlign: "center", color: T.gray, padding: "20px 16px 80px", fontSize: 13 }}>
-        Merci de faire grandir <strong>La Serre Africaine</strong>. &nbsp;|&nbsp; Pro : {PRO_PHONE}
+      <footer style={{ fontSize: 13, paddingBottom: 80 }}>
+        <div style={{ background: T.greenLight, borderTop: `1px solid ${T.greenBorder}`, padding: "14px 16px", textAlign: "center", cursor: "pointer" }}
+          onClick={() => navigateTo("formations")}>
+          <span style={{ color: T.greenDark, fontWeight: "bold" }}>📚 Formations Potager & Maraîchage BIO — dès 15 €</span>
+          <span style={{ color: T.gray, marginLeft: 8 }}>→ laserreafricaine.com/formations</span>
+        </div>
+        <div style={{ textAlign: "center", color: T.gray, padding: "14px 16px" }}>
+          Merci de faire grandir <strong>La Serre Africaine</strong>. &nbsp;|&nbsp; Pro : {PRO_PHONE}
+        </div>
       </footer>
     </>
   );
