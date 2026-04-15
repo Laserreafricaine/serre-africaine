@@ -546,7 +546,7 @@ export default function Formations({ onNavigateBoutique }) {
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             <button type="button" onClick={onNavigateBoutique}
-              style={{ background: T.white, color: T.greenDark, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", cursor: "pointer", fontSize: 13, border: "none" }}>
+              style={{ background: T.green, color: T.white, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", cursor: "pointer", fontSize: 13, border: "none" }}>
               🛒 Boutique
             </button>
             <div style={{ background: T.white, color: T.greenDark, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", fontSize: 13 }}>
@@ -719,6 +719,22 @@ export default function Formations({ onNavigateBoutique }) {
         <p style={{ opacity: 0.7, marginTop: 16, fontSize: 13 }}>
           Je serai là pour t'accompagner, répondre à tes questions, et partager ce que la terre m'a appris — sincèrement, simplement, INSHALLAH. 🌿
         </p>
+      </section>
+
+      <section style={{ padding: "0 16px 24px", maxWidth: 900, margin: "0 auto" }}>
+        <div onClick={onNavigateBoutique} style={{ background: T.green, color: "#fff", borderRadius: 18, padding: "22px 28px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+          <div>
+            <div style={{ fontSize: 11, opacity: 0.75, letterSpacing: 2, marginBottom: 6, fontWeight: "bold", textTransform: "uppercase" }}>Vous voulez aussi les goûter ?</div>
+            <div style={{ fontSize: 20, fontWeight: "bold", marginBottom: 6 }}>🛒 Commandez nos légumes africains BIO !</div>
+            <div style={{ fontSize: 13, opacity: 0.9, lineHeight: 1.6 }}>Gombo · Piment Habanero · Bissap · Chayotte · Aubergine amère · Livraison Mondial Relay</div>
+          </div>
+          <div style={{ textAlign: "center", flexShrink: 0 }}>
+            <div style={{ fontSize: 13, opacity: 0.75, marginBottom: 10 }}>Frais · BIO · Sans pesticides</div>
+            <div style={{ background: "#fff", color: T.green, borderRadius: 999, padding: "10px 20px", fontWeight: "bold", fontSize: 14, display: "inline-block" }}>
+              Voir la boutique →
+            </div>
+          </div>
+        </div>
       </section>
 
       <footer style={{ textAlign: "center", color: T.gray, padding: "20px 16px", fontSize: 13, background: T.white }}>
