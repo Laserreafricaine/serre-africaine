@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import mandiayePotagerImg from "./images/mandiaye-potager.jpg";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -293,14 +293,10 @@ function ConfirmationInscription({ formation, customer, fullPhone, email, onBack
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [sheetSent,     setSheetSent]     = useState(false);
 
-  const waMsg = encodeURIComponent(
-    `Bonjour Mandiaye,\n\nJe souhaite m'inscrire à la formation :\n${formation.emoji} ${formation.titre}\n\nMon profil :\nNom : ${customer.prenom} ${customer.nom}\nEmail : ${email}\nTéléphone : ${fullPhone}\nPays : ${customer.pays}\n\nMontant : ${formation.prix} € (${formation.prixFCFA})\nMention paiement : "${formation.mention}"\n\nMerci !`
-  );
-  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
-
-  const handleWAClick = useCallback(async () => {
+  // ✅ Envoi vers Sheets dès l'affichage de la confirmation — pas besoin de cliquer WA
+  useEffect(() => {
     if (sheetSent) return;
-    await sendInscriptionToSheets({
+    sendInscriptionToSheets({
       formation:     formation.titre,
       formationId:   formation.id,
       nom:           customer.nom,
@@ -310,10 +306,19 @@ function ConfirmationInscription({ formation, customer, fullPhone, email, onBack
       pays:          customer.pays,
       prix:          formation.prix,
       prixFCFA:      formation.prixFCFA,
-      paymentMethod: paymentMethod || "Non renseigné",
+      paymentMethod: "En attente de paiement",
     });
     setSheetSent(true);
-  }, [sheetSent, formation, customer, email, fullPhone, paymentMethod]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const waMsg = encodeURIComponent(
+    `Bonjour Mandiaye,\n\nJe souhaite m'inscrire à la formation :\n${formation.emoji} ${formation.titre}\n\nMon profil :\nNom : ${customer.prenom} ${customer.nom}\nEmail : ${email}\nTéléphone : ${fullPhone}\nPays : ${customer.pays}\n\nMontant : ${formation.prix} € (${formation.prixFCFA})\nMention paiement : "${formation.mention}"\n\nMerci !`
+  );
+  const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
+
+  const handleWAClick = useCallback(() => {
+    // Sheets déjà envoyé au montage — rien de plus à faire
+  }, []);
 
   return (
     <div style={{ background: T.bg, minHeight: "100vh" }}>
@@ -638,16 +643,23 @@ export default function Formations({ onNavigateBoutique }) {
             <p style={{ opacity: 0.9, margin: "0 0 16px", fontSize: 15 }}>Potager Maison + Maraîchage BIO — 4 jours complets</p>
             <div style={{ fontSize: 32, fontWeight: "bold", marginBottom: 4 }}>60 €</div>
             <div style={{ fontSize: 14, opacity: 0.8, marginBottom: 20 }}>40 000 FCFA</div>
-            <div style={{ background: T.amberLight, color: T.amber, borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: "bold", display: "inline-block", marginBottom: 16 }}>
+            <div style={{ background: T.amberLight, color: T.amber, borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: "bold", display: "inline-block", marginBottom: 20 }}>
               Mention : "Formations potager et maraîchage"
             </div>
             <br />
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Bonjour Mandiaye,\n\nJe souhaite m'inscrire au Pack Duo (Potager Maison + Maraîchage BIO).\nMontant : 60 €\n\nMerci !")}`}
-              target="_blank" rel="noreferrer">
-              <button type="button" style={{ background: "#25D366", color: T.white, border: "none", borderRadius: 999, padding: "14px 28px", fontWeight: "bold", cursor: "pointer", fontSize: 15 }}>
-                💬 S'inscrire au Pack Duo sur WhatsApp
-              </button>
-            </a>
+            <button type="button"
+              onClick={() => handleSelectFormation({
+                id: "duo", emoji: "🎓", titre: "Pack Duo — Potager & Maraîchage BIO",
+                sousTitre: "Les 2 formations — 4 jours complets",
+                formateur: "Mandiaye & Sébastien",
+                prix: 60, prixFCFA: "40 000 FCFA",
+                mention: "Formations potager et maraîchage",
+                couleur: "#1f7a3d", bg: "#f0fdf4", border: "#d1fae5",
+                programme: [],
+              })}
+              style={{ background: T.white, color: "#1f7a3d", border: "none", borderRadius: 999, padding: "14px 28px", fontWeight: "bold", cursor: "pointer", fontSize: 15 }}>
+              🎓 S'inscrire au Pack Duo →
+            </button>
           </div>
         </div>
       </section>
