@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import serreHeroImg from "./images/serre2.jpg";
+import mandiayePotagerImg from "./images/mandiaye-potager.jpg";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const WHATSAPP_NUMBER = "33603908935";
@@ -559,7 +559,7 @@ export default function Formations({ onNavigateBoutique }) {
       {/* ── PHOTO HERO ── */}
       <div style={{ width: "100%", height: 420, overflow: "hidden", position: "relative" }}>
         <img
-          src={serreHeroImg}
+          src={mandiayePotagerImg}
           alt="Mandiaye dans son potager"
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%" }}
         />
