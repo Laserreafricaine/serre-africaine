@@ -557,11 +557,11 @@ export default function Formations({ onNavigateBoutique }) {
       </header>
 
       {/* ── PHOTO HERO ── */}
-      <div style={{ width: "100%", height: 420, overflow: "hidden", position: "relative" }}>
+      <div style={{ width: "100%", height: 600, overflow: "hidden", position: "relative" }}>
         <img
           src={mandiayePotagerImg}
           alt="Mandiaye dans son potager"
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%" }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center" }}
         />
         {/* Overlay dégradé bas */}
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.55))" }} />
