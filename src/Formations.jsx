@@ -7,7 +7,7 @@ const PAYPAL_EMAIL    = "mandiayediallo@gmail.com";
 const WERO_NUMBER     = "06 59 01 25 99";
 const WAVE_NUMBER     = "+221 77 181 33 44";
 
-const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyrfnrWvErokZhGmTRGw0k39h3l1nIxYCdBcr7XxlV4SygPrCRaZEQKMnNwYdjQTuQuKw/exec";
+const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyIcKeHOHWek-peKHWbEP-KTCBC4aj6TqEpR8ncbu28iG_aEcUIEIapwFoh6-D4wFGHyA/exec";
 
 const COUNTRY_CODES = [
   { code: "+33",  flag: "🇫🇷", label: "France"        },
@@ -325,7 +325,7 @@ function ConfirmationInscription({ formation, customer, fullPhone, email, onBack
           onPaymentChosen={(m) => { setPaymentMethod(m); setShowPayment(false); }}
         />
       )}
-      <div style={{ background: T.green, color: T.white, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+      <div style={{ background: "#1e40af", color: T.white, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
         <button type="button" onClick={onBack} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: T.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontWeight: "bold", fontSize: 13 }}>← Retour</button>
         <h1 style={{ margin: 0, fontSize: 18, fontWeight: "bold" }}>Confirmation d'inscription</h1>
       </div>
@@ -420,7 +420,7 @@ function FormulaireInscription({ formation, onBack, onConfirm }) {
 
   return (
     <div style={{ background: T.bg, minHeight: "100vh" }}>
-      <div style={{ background: T.green, color: T.white, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+      <div style={{ background: "#1e40af", color: T.white, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
         <button type="button" onClick={onBack} style={{ background: "rgba(255,255,255,0.15)", border: "none", color: T.white, borderRadius: 8, padding: "8px 14px", cursor: "pointer", fontWeight: "bold", fontSize: 13 }}>← Retour</button>
         <h1 style={{ margin: 0, fontSize: 18, fontWeight: "bold" }}>Inscription — {formation.titre}</h1>
       </div>
@@ -538,7 +538,7 @@ export default function Formations({ onNavigateBoutique }) {
       `}</style>
 
       {/* Header */}
-      <header style={{ background: T.green, color: T.white, padding: "15px 16px", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
+      <header style={{ background: "#1e40af", color: T.white, padding: "15px 16px", position: "sticky", top: 0, zIndex: 30, boxShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: "bold" }}>LA SERRE AFRICAINE</h1>
@@ -546,10 +546,10 @@ export default function Formations({ onNavigateBoutique }) {
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             <button type="button" onClick={onNavigateBoutique}
-              style={{ background: T.green, color: T.white, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", cursor: "pointer", fontSize: 13, border: "none" }}>
+              style={{ background: T.white, color: "#1e40af", borderRadius: 999, padding: "10px 18px", fontWeight: "bold", cursor: "pointer", fontSize: 13, border: "none" }}>
               🛒 Boutique
             </button>
-            <div style={{ background: T.white, color: T.greenDark, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", fontSize: 13 }}>
+            <div style={{ background: "rgba(255,255,255,0.15)", color: T.white, borderRadius: 999, padding: "10px 18px", fontWeight: "bold", fontSize: 13, border: "1px solid rgba(255,255,255,0.3)" }}>
               📚 Formations
             </div>
           </div>
