@@ -1223,7 +1223,12 @@ export default function App() {
           <Section bg={T.bgAlt}>
             <div style={card}>
               <SectionTitle emoji="🥬" title="Produits à l'unité" subtitle="Par tranche de 0,5 kg — récolte hebdomadaire, livraison fraîche."
-                action={<span style={{ background: T.amberLight, color: T.amber, fontWeight: "bold", padding: "7px 14px", borderRadius: 999, fontSize: 13 }}>⚡ −15% dès 5 kg</span>} />
+                action={
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <span style={{ background: T.amberLight, color: T.amber, fontWeight: "bold", padding: "7px 14px", borderRadius: 999, fontSize: 13 }}>⚡ −15% dès 5 kg</span>
+                    <span style={{ background: T.greenLight, color: T.greenDark, fontWeight: "bold", padding: "7px 14px", borderRadius: 999, fontSize: 13 }}>🚚 Livraison gratuite dès {FREE_DELIVERY_THRESHOLD} €</span>
+                  </div>
+                } />
               {cart.totalUnitWeight > 0 && <BulkBanner totalUnitWeight={cart.totalUnitWeight} bulkDiscount={cart.bulkDiscount} />}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
                 {PRODUCTS.map((product) => (
