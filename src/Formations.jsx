@@ -31,6 +31,35 @@ const COUNTRY_CODES = [
   { code: "+39",  flag: "🇮🇹", label: "Italie"        },
 ];
 
+const PAYS_LIST_F = [
+  // Europe
+  { value: "France",        label: "🇫🇷 France"              },
+  { value: "Belgique",      label: "🇧🇪 Belgique"             },
+  { value: "Luxembourg",    label: "🇱🇺 Luxembourg"           },
+  { value: "Suisse",        label: "🇨🇭 Suisse"               },
+  { value: "Canada",        label: "🇨🇦 Canada"               },
+  // Afrique francophone
+  { value: "Sénégal",       label: "🇸🇳 Sénégal"              },
+  { value: "Côte d'Ivoire", label: "🇨🇮 Côte d'Ivoire"        },
+  { value: "Mali",          label: "🇲🇱 Mali"                  },
+  { value: "Guinée",        label: "🇬🇳 Guinée"                },
+  { value: "Cameroun",      label: "🇨🇲 Cameroun"             },
+  { value: "Congo",         label: "🇨🇬 Congo"                 },
+  { value: "RD Congo",      label: "🇨🇩 RD Congo"             },
+  { value: "Gabon",         label: "🇬🇦 Gabon"                 },
+  { value: "Togo",          label: "🇹🇬 Togo"                  },
+  { value: "Bénin",         label: "🇧🇯 Bénin"                 },
+  { value: "Burkina Faso",  label: "🇧🇫 Burkina Faso"         },
+  { value: "Niger",         label: "🇳🇪 Niger"                 },
+  { value: "Tchad",         label: "🇹🇩 Tchad"                 },
+  { value: "Madagascar",    label: "🇲🇬 Madagascar"            },
+  { value: "Maroc",         label: "🇲🇦 Maroc"                 },
+  { value: "Algérie",       label: "🇩🇿 Algérie"               },
+  { value: "Tunisie",       label: "🇹🇳 Tunisie"               },
+  { value: "Mauritanie",    label: "🇲🇷 Mauritanie"            },
+  { value: "Autre",         label: "🌍 Autre pays"             },
+];
+
 const FORMATIONS = [
   {
     id:        "potager",
@@ -446,7 +475,24 @@ function FormulaireInscription({ formation, onBack, onConfirm }) {
             <ValidatedInput placeholder="Prénom" value={customer.prenom} onChange={(v) => setCustomer(p => ({ ...p, prenom: v }))} validate={(v) => v.trim().length >= 2} />
             <ValidatedInput placeholder="Nom" value={customer.nom} onChange={(v) => setCustomer(p => ({ ...p, nom: v }))} validate={(v) => v.trim().length >= 2} />
             <ValidatedInput placeholder="Email" type="email" value={email} onChange={setEmail} validate={(v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)} />
-            <ValidatedInput placeholder="Pays" value={customer.pays} onChange={(v) => setCustomer(p => ({ ...p, pays: v }))} validate={(v) => v.trim().length >= 2} />
+            <select
+              value={customer.pays}
+              onChange={(e) => setCustomer(p => ({ ...p, pays: e.target.value }))}
+              style={{ padding: "11px 12px", fontSize: 14, borderRadius: 8, border: `1.5px solid ${customer.pays ? "#22c55e" : "#cbd5e1"}`, width: "100%", background: "#fff", cursor: "pointer" }}
+            >
+              <option value="">🌍 Sélectionnez votre pays</option>
+              <optgroup label="Europe">
+                {PAYS_LIST_F.filter(p => ["France","Belgique","Luxembourg","Suisse","Canada"].includes(p.value)).map(p => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </optgroup>
+              <optgroup label="Afrique francophone">
+                {PAYS_LIST_F.filter(p => !["France","Belgique","Luxembourg","Suisse","Canada","Autre"].includes(p.value)).map(p => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </optgroup>
+              <option value="Autre">🌍 Autre pays</option>
+            </select>
             <div style={{ display: "flex", gap: 8 }}>
               <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)}
                 style={{ padding: "11px 8px", fontSize: 14, borderRadius: 8, border: "1.5px solid #cbd5e1", background: T.white, flexShrink: 0, width: 130 }}>
