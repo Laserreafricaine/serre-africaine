@@ -633,7 +633,7 @@ function PackCard({ pack, qty, onDecrement, onIncrement, onAdd }) {
 }
 
 // ─── Cart content ─────────────────────────────────────────────────────────────
-function CartContent({ cart, onValidate, missingFields }) {
+function CartContent({ cart, onValidate, missingFields, pays }) {
   const { subtotal, grandTotal, deliveryCost, relayIsFree, hasPremiumPack, totalItems, totalWeight, unitItemsWithDiscount, selectedPacks, savingsToFree, bulkDiscount, totalUnitWeight, deliveryMode, setDeliveryMode, relayPrice, homePrice, clearCart } = cart;
   return (
     <>
@@ -670,7 +670,7 @@ function CartContent({ cart, onValidate, missingFields }) {
           </div>
           <div style={cartLine}><span style={{ fontSize: 13 }}>Sous-total</span><strong style={{ fontSize: 13 }}>{subtotal.toFixed(2)} €</strong></div>
           <div style={{ margin: "12px 0" }}>
-            <DeliverySelector mode={deliveryMode} setMode={setDeliveryMode} relayPrice={relayPrice} homePrice={homePrice} relayIsFree={relayIsFree} subtotal={subtotal} isHomeOnly={isHomeOnlyCountry(customer?.pays)} />
+            <DeliverySelector mode={deliveryMode} setMode={setDeliveryMode} relayPrice={relayPrice} homePrice={homePrice} relayIsFree={relayIsFree} subtotal={subtotal} isHomeOnly={isHomeOnlyCountry(pays)} />
           </div>
           <div style={{ ...cartLine, borderBottom: "none" }}>
             <span style={{ fontWeight: "bold" }}>Livraison</span>
@@ -1386,14 +1386,14 @@ export default function App() {
             </div>
             <div style={card}>
               <SectionTitle emoji="🛒" title="Votre panier" />
-              <CartContent cart={cart} onValidate={() => { setShowConfirmation(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} missingFields={missingFields} />
+              <CartContent cart={cart} onValidate={() => { setShowConfirmation(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} missingFields={missingFields} pays={customer.pays} />
             </div>
           </Section>
         </div>
 
         {/* Sticky cart */}
         <div className="sticky-cart" style={{ position: "sticky", top: 80, width: 320, flexShrink: 0, background: T.white, borderRadius: 18, border: `1px solid ${T.border}`, boxShadow: "0 8px 24px rgba(0,0,0,0.10)", padding: 20, alignSelf: "flex-start" }}>
-          <CartContent cart={cart} onValidate={() => { setShowConfirmation(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} missingFields={missingFields} />
+          <CartContent cart={cart} onValidate={() => { setShowConfirmation(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} missingFields={missingFields} pays={customer.pays} />
         </div>
       </div>
 
