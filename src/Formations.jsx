@@ -135,15 +135,20 @@ const card = {
 async function sendInscriptionToSheets(payload) {
   if (!SHEETS_WEBHOOK_URL || SHEETS_WEBHOOK_URL === "COLLE_TON_URL_ICI") return;
   try {
-    const encoded = encodeURIComponent(JSON.stringify({ type: "inscription", ...payload }));
+    const data    = { type: "inscription", ...payload };
+    const encoded = encodeURIComponent(JSON.stringify(data));
     const url     = `${SHEETS_WEBHOOK_URL}?data=${encoded}`;
-    await new Promise((resolve) => {
-      const img = new Image();
-      img.onload = resolve;
-      img.onerror = resolve;
-      img.src = url;
-    });
+    // Utilise fetch avec no-cors + redirect follow pour Apps Script
+    await fetch(url, { method: "GET", mode: "no-cors", redirect: "follow" });
+    console.log("✅ Inscription envoyée vers Google Sheets");
   } catch (err) {
+    // Fallback : méthode Image
+    try {
+      const encoded2 = encodeURIComponent(JSON.stringify({ type: "inscription", ...payload }));
+      const url2 = `${SHEETS_WEBHOOK_URL}?data=${encoded2}`;
+      const img = new Image();
+      img.src = url2;
+    } catch(e) {}
     console.warn("Sheets inscription error:", err);
   }
 }
