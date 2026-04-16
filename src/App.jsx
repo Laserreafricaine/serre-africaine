@@ -607,7 +607,7 @@ function PackCard({ pack, qty, onDecrement, onIncrement, onAdd }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
         <span style={{ fontSize: 26, color: T.greenDark, fontWeight: "bold" }}>{pack.price.toFixed(2)} €</span>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {pack.isPremium && <span style={{ background: T.greenLight, color: T.greenDark, fontWeight: "bold", padding: "4px 10px", borderRadius: 999, fontSize: 12 }}>🚚 Livraison Relais offerte</span>}
+          {pack.isPremium && <span className="badge-livraison-offerte">🎁 Livraison Point Relais offerte</span>}
           {pack.highlight && <span style={{ background: T.amberLight, color: T.amber, fontWeight: "bold", padding: "4px 10px", borderRadius: 999, fontSize: 12 }}>Le plus avantageux</span>}
         </div>
       </div>
@@ -1114,6 +1114,23 @@ export default function App() {
         @media (max-width: 1023px) { .layout { display: block; } }
         input:focus, select:focus { outline: 2px solid ${T.green}; border-color: transparent; }
         button:hover { opacity: 0.9; } button:active { transform: scale(0.97); }
+        @keyframes pulse-livraison {
+          0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.45); transform: scale(1); }
+          50%  { box-shadow: 0 0 0 7px rgba(34,197,94,0); transform: scale(1.05); }
+          100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); transform: scale(1); }
+        }
+        @keyframes shimmer-dot {
+          0%,100% { opacity: 1; } 50% { opacity: 0.5; }
+        }
+        .badge-livraison-offerte {
+          display: inline-flex; align-items: center; gap: 7px;
+          background: #dcfce7; color: #14532d;
+          font-size: 12px; font-weight: bold;
+          padding: 5px 12px; border-radius: 999px;
+          border: 1.5px solid #22c55e;
+          animation: pulse-livraison 2s ease-in-out infinite;
+          white-space: nowrap;
+        }
         ::-webkit-scrollbar { height: 4px; } ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
       `}</style>
 
