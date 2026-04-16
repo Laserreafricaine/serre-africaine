@@ -79,23 +79,57 @@ const STOCK_INFO = {
 };
 
 // ─── Mondial Relay ────────────────────────────────────────────────────────────
-const MR_RELAY_RATES = [
-  { maxKg: 0.5,  price: 4.55  },
-  { maxKg: 1,    price: 5.35  },
-  { maxKg: 2,    price: 6.05  },
-  { maxKg: 3,    price: 6.95  },
-  { maxKg: 5,    price: 8.15  },
-  { maxKg: 7,    price: 10.75 },
-  { maxKg: 10,   price: 13.00 },
-  { maxKg: 15,   price: 15.70 },
-  { maxKg: 30,   price: 19.70 },
+// Tarifs France métropolitaine (Point Relais, TTC 2026)
+const MR_RELAY_RATES_FR = [
+  { maxKg: 0.5,  price: 4.49  },
+  { maxKg: 1,    price: 5.69  },
+  { maxKg: 2,    price: 6.90  },
+  { maxKg: 5,    price: 9.50  },
+  { maxKg: 10,   price: 13.90 },
+  { maxKg: 20,   price: 22.40 },
+  { maxKg: 30,   price: 25.99 },
 ];
-function getMRRelayPrice(w) {
-  const weight = Math.max(0.1, w);
-  const b = MR_RELAY_RATES.find((r) => weight <= r.maxKg);
-  return b ? b.price : MR_RELAY_RATES[MR_RELAY_RATES.length - 1].price;
+
+// Tarifs internationaux Point Relais (TTC 2026) — par zone de poids
+const MR_RELAY_RATES_INTL = {
+  // Zone 1 : Belgique, Luxembourg
+  zone1: [
+    { maxKg: 2,  price: 6.99  },
+    { maxKg: 8,  price: 10.79 },
+    { maxKg: 25, price: 12.29 },
+  ],
+  // Zone 2 : Espagne, Italie
+  zone2: [
+    { maxKg: 2,  price: 8.39  },
+    { maxKg: 8,  price: 11.39 },
+    { maxKg: 25, price: 12.59 },
+  ],
+  // Zone 3 : Portugal, Pologne, Pays-Bas
+  zone3: [
+    { maxKg: 2,  price: 9.30  },
+    { maxKg: 8,  price: 11.63 },
+    { maxKg: 25, price: 12.79 },
+  ],
+};
+
+// Détection de la zone depuis le pays saisi (texte libre)
+function getDeliveryZone(pays) {
+  if (!pays) return "fr";
+  const p = pays.toLowerCase().trim();
+  if (p.includes("belg") || p.includes("luxembourg") || p.includes("luxe")) return "zone1";
+  if (p.includes("espagne") || p.includes("spain") || p.includes("italie") || p.includes("italy")) return "zone2";
+  if (p.includes("portug") || p.includes("polong") || p.includes("poland") || p.includes("pays-bas") || p.includes("pays bas") || p.includes("hollande") || p.includes("nether")) return "zone3";
+  return "fr"; // France par défaut
 }
-function getMRHomePrice(w) { return getMRRelayPrice(w) + MR_HOME_SURCHARGE; }
+
+function getMRRelayPrice(w, pays) {
+  const weight = Math.max(0.1, w);
+  const zone   = getDeliveryZone(pays);
+  const rates  = zone === "fr" ? MR_RELAY_RATES_FR : MR_RELAY_RATES_INTL[zone];
+  const b      = rates.find((r) => weight <= r.maxKg);
+  return b ? b.price : rates[rates.length - 1].price;
+}
+function getMRHomePrice(w, pays) { return getMRRelayPrice(w, pays) + MR_HOME_SURCHARGE; }
 
 // ─── Produits & Packs ─────────────────────────────────────────────────────────
 const PRODUCTS = [
@@ -145,7 +179,7 @@ const PACKS = [
 ];
 
 // ─── useCart ──────────────────────────────────────────────────────────────────
-function useCart() {
+function useCart(pays) {
   const [unitCart,     setUnitCart]     = useState(() => Object.fromEntries(PRODUCTS.map((p) => [p.id, 0])));
   const [packCart,     setPackCart]     = useState(() => Object.fromEntries(PACKS.map((p) => [p.id, 0])));
   const [deliveryMode, setDeliveryMode] = useState("relay");
@@ -185,8 +219,8 @@ function useCart() {
 
   const hasPremiumPack = selectedPacks.some((p) => p.isPremium);
   const relayIsFree    = subtotal >= FREE_DELIVERY_THRESHOLD || hasPremiumPack;
-  const relayPrice     = getMRRelayPrice(totalWeight);
-  const homePrice      = getMRHomePrice(totalWeight);
+  const relayPrice     = getMRRelayPrice(totalWeight, pays);
+  const homePrice      = getMRHomePrice(totalWeight, pays);
 
   const deliveryCost = subtotal === 0 ? 0
     : deliveryMode === "home" ? homePrice
@@ -487,7 +521,7 @@ function DeliverySelector({ mode, setMode, relayPrice, homePrice, relayIsFree, s
       <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 8, fontSize: 14 }}>Mode de livraison</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         {[
-          { key: "relay", icon: "📦", label: "Point Relais", price: subtotal > 0 && relayIsFree ? <span style={{ color: T.greenDark }}>Offerte 🎁</span> : `${relayPrice.toFixed(2)} €`, note: "3–5 j ouvrés" },
+          { key: "relay", icon: "📦", label: "Point Relais", price: subtotal > 0 && relayIsFree ? <span style={{ color: T.greenDark }}>Offerte 🎁</span> : `${relayPrice.toFixed(2)} €`, note: "3–5 j ouvrés · tarif selon destination" },
           { key: "home",  icon: "🏠", label: "À domicile",   price: `${homePrice.toFixed(2)} €`, note: "Toujours payante" },
         ].map((opt) => (
           <button key={opt.key} type="button" onClick={() => setMode(opt.key)} style={{ padding: "10px 12px", borderRadius: 10, cursor: "pointer", textAlign: "left", border: mode === opt.key ? `2px solid ${T.green}` : `1px solid ${T.border}`, background: mode === opt.key ? T.greenLight : T.white, transition: "all 0.2s" }}>
@@ -956,7 +990,7 @@ export default function App() {
   }, []);
 
   // ─── Hooks boutique — TOUJOURS appelés avant tout return conditionnel ────────
-  const cart = useCart();
+  const cart = useCart(customer.pays);
   const [customer,         setCustomer]         = useState({ nom: "", prenom: "", adresse: "", codePostal: "", ville: "", pays: "France" });
   const [countryCode,      setCountryCode]      = useState("+33");
   const [phoneNumber,      setPhoneNumber]      = useState("");
@@ -1119,15 +1153,36 @@ export default function App() {
             <div style={card}>
               <SectionTitle emoji="🚚" title="Tarifs de livraison" subtitle="Via Mondial Relay — calculés selon le poids réel de votre commande." />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 14 }}>
+                {/* France */}
                 <div style={{ background: T.greenLight, borderRadius: 12, padding: 16, border: `1px solid ${T.greenBorder}` }}>
-                  <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 12, fontSize: 14 }}>📦 Point Relais (France)</div>
-                  {MR_RELAY_RATES.map((r) => (
+                  <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 12, fontSize: 14 }}>📦 Point Relais — France</div>
+                  {MR_RELAY_RATES_FR.map((r) => (
                     <div key={r.maxKg} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0", borderBottom: `1px solid ${T.greenBorder}` }}>
                       <span style={{ color: T.gray }}>jusqu'à {r.maxKg} kg</span><strong>{r.price.toFixed(2)} €</strong>
                     </div>
                   ))}
                   <div style={{ marginTop: 10, fontSize: 12, color: T.greenDark, fontWeight: "bold" }}>🎁 Offerte dès {FREE_DELIVERY_THRESHOLD} € ou avec le Pack Premium</div>
                 </div>
+                {/* International */}
+                <div style={{ background: "#eff6ff", borderRadius: 12, padding: 16, border: "1px solid #bfdbfe" }}>
+                  <div style={{ fontWeight: "bold", color: "#1e40af", marginBottom: 12, fontSize: 14 }}>🌍 Point Relais — Europe</div>
+                  {[
+                    { zone: "🇧🇪🇱🇺 Belgique / Luxembourg", rates: MR_RELAY_RATES_INTL.zone1 },
+                    { zone: "🇪🇸🇮🇹 Espagne / Italie",       rates: MR_RELAY_RATES_INTL.zone2 },
+                    { zone: "🇵🇹🇵🇱🇳🇱 Portugal / Pologne / Pays-Bas", rates: MR_RELAY_RATES_INTL.zone3 },
+                  ].map(({ zone, rates }) => (
+                    <div key={zone} style={{ marginBottom: 10 }}>
+                      <div style={{ fontSize: 12, fontWeight: "bold", color: "#1e40af", marginBottom: 4 }}>{zone}</div>
+                      {rates.map((r) => (
+                        <div key={r.maxKg} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "2px 0", borderBottom: "1px solid #dbeafe" }}>
+                          <span style={{ color: T.gray }}>jusqu'à {r.maxKg} kg</span><strong>{r.price.toFixed(2)} €</strong>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  <div style={{ marginTop: 8, fontSize: 11, color: "#1e40af", fontWeight: "bold" }}>Le tarif est calculé automatiquement selon votre pays.</div>
+                </div>
+                {/* Domicile */}
                 <div style={{ background: T.grayLight, borderRadius: 12, padding: 16, border: `1px solid ${T.border}` }}>
                   <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 10, fontSize: 14 }}>🏠 Livraison à domicile</div>
                   <p style={{ color: T.gray, fontSize: 14, marginBottom: 10 }}>Tarif Point Relais + <strong>{MR_HOME_SURCHARGE.toFixed(2)} €</strong> de supplément.</p>
