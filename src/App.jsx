@@ -1059,8 +1059,8 @@ export default function App() {
   }, []);
 
   // ─── Hooks boutique — TOUJOURS appelés avant tout return conditionnel ────────
-  const cart = useCart(customer.pays);
   const [customer,         setCustomer]         = useState({ nom: "", prenom: "", adresse: "", codePostal: "", ville: "", pays: "France" });
+  const cart = useCart(customer.pays);
   const [countryCode,      setCountryCode]      = useState("+33");
   const [phoneNumber,      setPhoneNumber]      = useState("");
   const [toast,            setToast]            = useState(false);
