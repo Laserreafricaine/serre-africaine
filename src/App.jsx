@@ -81,15 +81,16 @@ const STOCK_INFO = {
 
 // ─── Liste des pays (Mondial Relay uniquement) ────────────────────────────────
 const PAYS_LIST = [
-  { value: "France",     label: "🇫🇷 France",     zone: "fr"    },
-  { value: "Belgique",   label: "🇧🇪 Belgique",    zone: "zone1" },
-  { value: "Luxembourg", label: "🇱🇺 Luxembourg",  zone: "zone1" },
-  { value: "Espagne",    label: "🇪🇸 Espagne",     zone: "zone2" },
-  { value: "Italie",     label: "🇮🇹 Italie",      zone: "zone2" },
-  { value: "Portugal",   label: "🇵🇹 Portugal",    zone: "zone3" },
-  { value: "Pologne",    label: "🇵🇱 Pologne",     zone: "zone3" },
-  { value: "Pays-Bas",   label: "🇳🇱 Pays-Bas",    zone: "zone3" },
-  { value: "autre",      label: "🌍 Autre pays — nous contacter", zone: "other" },
+  { value: "France",     label: "🇫🇷 France",                          zone: "fr"        },
+  { value: "Belgique",   label: "🇧🇪 Belgique",                         zone: "zone1"     },
+  { value: "Luxembourg", label: "🇱🇺 Luxembourg",                       zone: "zone1"     },
+  { value: "Espagne",    label: "🇪🇸 Espagne",                          zone: "zone2"     },
+  { value: "Italie",     label: "🇮🇹 Italie",                           zone: "zone2"     },
+  { value: "Portugal",   label: "🇵🇹 Portugal",                         zone: "zone3"     },
+  { value: "Pologne",    label: "🇵🇱 Pologne",                          zone: "zone3"     },
+  { value: "Pays-Bas",   label: "🇳🇱 Pays-Bas",                         zone: "zone3"     },
+  { value: "Allemagne",  label: "🇩🇪 Allemagne (livraison à domicile)", zone: "home_only" },
+  { value: "autre",      label: "🌍 Autre pays — nous contacter",       zone: "other"     },
 ];
 
 // ─── Mondial Relay ────────────────────────────────────────────────────────────
@@ -124,6 +125,12 @@ const MR_RELAY_RATES_INTL = {
     { maxKg: 8,  price: 11.63 },
     { maxKg: 25, price: 12.79 },
   ],
+  // Allemagne — domicile uniquement
+  home_only: [
+    { maxKg: 2,  price: 9.50  },
+    { maxKg: 8,  price: 13.50 },
+    { maxKg: 25, price: 18.00 },
+  ],
 };
 
 // Détection de la zone depuis le pays sélectionné
@@ -131,6 +138,11 @@ function getDeliveryZone(pays) {
   if (!pays) return "fr";
   const found = PAYS_LIST.find((p) => p.value === pays);
   return found ? found.zone : "fr";
+}
+// Allemagne = domicile uniquement, pas de Point Relais
+function isHomeOnlyCountry(pays) {
+  const found = PAYS_LIST.find((p) => p.value === pays);
+  return found ? found.zone === "home_only" : false;
 }
 
 function getMRRelayPrice(w, pays) {
@@ -544,14 +556,14 @@ function BulkBanner({ totalUnitWeight, bulkDiscount }) {
   );
 }
 
-function DeliverySelector({ mode, setMode, relayPrice, homePrice, relayIsFree, subtotal }) {
+function DeliverySelector({ mode, setMode, relayPrice, homePrice, relayIsFree, subtotal, isHomeOnly }) {
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 8, fontSize: 14 }}>Mode de livraison</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         {[
-          { key: "relay", icon: "📦", label: "Point Relais", price: subtotal > 0 && relayIsFree ? <span style={{ color: T.greenDark }}>Offerte 🎁</span> : `${relayPrice.toFixed(2)} €`, note: "3–5 j ouvrés · tarif selon destination" },
-          { key: "home",  icon: "🏠", label: "À domicile",   price: `${homePrice.toFixed(2)} €`, note: "Toujours payante" },
+          ...(!isHomeOnly ? [{ key: "relay", icon: "📦", label: "Point Relais", price: subtotal > 0 && relayIsFree ? <span style={{ color: T.greenDark }}>Offerte 🎁</span> : `${relayPrice.toFixed(2)} €`, note: "3–5 j ouvrés · tarif selon destination" }] : []),
+          { key: "home",  icon: "🏠", label: isHomeOnly ? "Domicile (Allemagne)" : "À domicile", price: `${homePrice.toFixed(2)} €`, note: isHomeOnly ? "Seul mode disponible" : "Toujours payante" },
         ].map((opt) => (
           <button key={opt.key} type="button" onClick={() => setMode(opt.key)} style={{ padding: "10px 12px", borderRadius: 10, cursor: "pointer", textAlign: "left", border: mode === opt.key ? `2px solid ${T.green}` : `1px solid ${T.border}`, background: mode === opt.key ? T.greenLight : T.white, transition: "all 0.2s" }}>
             <div style={{ fontWeight: "bold", fontSize: 13, color: T.greenDark }}>{opt.icon} {opt.label}</div>
@@ -658,7 +670,7 @@ function CartContent({ cart, onValidate, missingFields }) {
           </div>
           <div style={cartLine}><span style={{ fontSize: 13 }}>Sous-total</span><strong style={{ fontSize: 13 }}>{subtotal.toFixed(2)} €</strong></div>
           <div style={{ margin: "12px 0" }}>
-            <DeliverySelector mode={deliveryMode} setMode={setDeliveryMode} relayPrice={relayPrice} homePrice={homePrice} relayIsFree={relayIsFree} subtotal={subtotal} />
+            <DeliverySelector mode={deliveryMode} setMode={setDeliveryMode} relayPrice={relayPrice} homePrice={homePrice} relayIsFree={relayIsFree} subtotal={subtotal} isHomeOnly={isHomeOnlyCountry(customer?.pays)} />
           </div>
           <div style={{ ...cartLine, borderBottom: "none" }}>
             <span style={{ fontWeight: "bold" }}>Livraison</span>
@@ -1245,18 +1257,19 @@ export default function App() {
           <Section>
             <div style={card}>
               <SectionTitle emoji="🚚" title="Tarifs de livraison" subtitle="Via Mondial Relay — Tarifs 2026, calculés selon le poids réel et le pays de destination." />
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 14 }}>
+              {/* 3 cartes en grille */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 14 }}>
                 {/* France */}
                 <div style={{ background: T.greenLight, borderRadius: 12, padding: 16, border: `1px solid ${T.greenBorder}` }}>
                   <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 12, fontSize: 14 }}>📦 Point Relais — France</div>
                   {MR_RELAY_RATES_FR.map((r) => (
-                    <div key={r.maxKg} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0", borderBottom: `1px solid ${T.greenBorder}` }}>
-                      <span style={{ color: T.gray }}>jusqu'à {r.maxKg} kg</span><strong>{r.price.toFixed(2)} €</strong>
+                    <div key={r.maxKg} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "4px 0", borderBottom: `1px solid ${T.greenBorder}` }}>
+                      <span style={{ color: "#166534" }}>jusqu'à {r.maxKg} kg</span><strong style={{ color: "#166534" }}>{r.price.toFixed(2)} €</strong>
                     </div>
                   ))}
                   <div style={{ marginTop: 10, fontSize: 12, color: T.greenDark, fontWeight: "bold" }}>🎁 Offerte dès {FREE_DELIVERY_THRESHOLD} € ou avec le Pack Premium</div>
                 </div>
-                {/* International */}
+                {/* Europe Point Relais */}
                 <div style={{ background: "#eff6ff", borderRadius: 12, padding: 16, border: "1px solid #bfdbfe" }}>
                   <div style={{ fontWeight: "bold", color: "#1e40af", marginBottom: 12, fontSize: 14 }}>🌍 Point Relais — Europe</div>
                   {[
@@ -1265,22 +1278,44 @@ export default function App() {
                     { zone: "🇵🇹🇵🇱🇳🇱 Portugal / Pologne / Pays-Bas", rates: MR_RELAY_RATES_INTL.zone3 },
                   ].map(({ zone, rates }) => (
                     <div key={zone} style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 12, fontWeight: "bold", color: "#1e40af", marginBottom: 4 }}>{zone}</div>
+                      <div style={{ fontSize: 11, fontWeight: "bold", color: "#1e40af", marginBottom: 4 }}>{zone}</div>
                       {rates.map((r) => (
                         <div key={r.maxKg} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "2px 0", borderBottom: "1px solid #dbeafe" }}>
-                          <span style={{ color: T.gray }}>jusqu'à {r.maxKg} kg</span><strong>{r.price.toFixed(2)} €</strong>
+                          <span style={{ color: "#1e40af" }}>jusqu'à {r.maxKg} kg</span><strong style={{ color: "#1e40af" }}>{r.price.toFixed(2)} €</strong>
                         </div>
                       ))}
                     </div>
                   ))}
-                  <div style={{ marginTop: 8, fontSize: 11, color: "#1e40af", fontWeight: "bold" }}>Le tarif est calculé automatiquement selon votre pays.</div>
+                  <div style={{ marginTop: 8, fontSize: 11, color: "#1e40af", fontWeight: "bold" }}>Tarif calculé automatiquement selon votre pays.</div>
                 </div>
-                {/* Domicile */}
-                <div style={{ background: T.grayLight, borderRadius: 12, padding: 16, border: `1px solid ${T.border}` }}>
-                  <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 10, fontSize: 14 }}>🏠 Livraison à domicile</div>
-                  <p style={{ color: T.gray, fontSize: 14, marginBottom: 10 }}>Tarif Point Relais + <strong>{MR_HOME_SURCHARGE.toFixed(2)} €</strong> de supplément.</p>
-                  <div style={{ background: T.redLight, color: T.red, borderRadius: 8, padding: 10, fontSize: 13, fontWeight: "bold" }}>⚠️ Toujours payante, même au-delà de {FREE_DELIVERY_THRESHOLD} €.</div>
+                {/* Allemagne */}
+                <div style={{ background: "#fef9ee", borderRadius: 12, padding: 16, border: "1px solid #fde68a" }}>
+                  <div style={{ fontWeight: "bold", color: "#92400e", marginBottom: 8, fontSize: 14 }}>🇩🇪 Allemagne — domicile</div>
+                  <div style={{ fontSize: 12, color: "#92400e", marginBottom: 10 }}>Mondial Relay livre uniquement à domicile en Allemagne.</div>
+                  {MR_RELAY_RATES_INTL.home_only.map((r) => (
+                    <div key={r.maxKg} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "3px 0", borderBottom: "1px solid #fde68a" }}>
+                      <span style={{ color: "#92400e" }}>jusqu'à {r.maxKg} kg</span><strong style={{ color: "#92400e" }}>{r.price.toFixed(2)} €</strong>
+                    </div>
+                  ))}
                 </div>
+              </div>
+              {/* Bande domicile pleine largeur */}
+              <div style={{ background: T.grayLight, borderRadius: 12, padding: "14px 20px", border: `0.5px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 22 }}>🏠</span>
+                  <div>
+                    <div style={{ fontWeight: "bold", fontSize: 14, color: T.greenDark }}>Livraison à domicile</div>
+                    <div style={{ fontSize: 12, color: T.gray }}>Tarif Point Relais + <strong>{MR_HOME_SURCHARGE.toFixed(2)} €</strong> de supplément</div>
+                  </div>
+                </div>
+                <div style={{ background: T.redLight, color: T.red, borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: "bold" }}>⚠️ Toujours payante, même au-delà de {FREE_DELIVERY_THRESHOLD} €</div>
+              </div>
+              {/* Bandeau emballage */}
+              <div style={{ marginTop: 12, background: "#fef9ee", borderRadius: 10, padding: "12px 16px", border: "1px solid #fde68a", display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 18, flexShrink: 0 }}>📦</span>
+                <span style={{ fontSize: 13, color: "#92400e" }}>
+                  <strong>Important :</strong> les tarifs Mondial Relay sont calculés sur le poids total, emballage inclus. Comptez environ 0,3 à 0,5 kg d'emballage selon votre commande.
+                </span>
               </div>
             </div>
           </Section>
