@@ -7,7 +7,7 @@ const PAYPAL_EMAIL    = "mandiayediallo@gmail.com";
 const WERO_NUMBER     = "06 59 01 25 99";
 const WAVE_NUMBER     = "+221 77 181 33 44";
 
-const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyIcKeHOHWek-peKHWbEP-KTCBC4aj6TqEpR8ncbu28iG_aEcUIEIapwFoh6-D4wFGHyA/exec";
+const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw_Qaqpsfz4pfjvY-hB8OE8X-6shBWTIAn1N5jdju0pH-CvTCdob8Kba_oMsmLzdvt53g/exec";
 
 const COUNTRY_CODES = [
   { code: "+33",  flag: "🇫🇷", label: "France"        },
