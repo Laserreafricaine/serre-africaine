@@ -1222,7 +1222,7 @@ export default function App() {
 
           <Section>
             <div style={card}>
-              <SectionTitle emoji="🚚" title="Tarifs de livraison" subtitle="Via Mondial Relay — calculés selon le poids réel de votre commande." />
+              <SectionTitle emoji="🚚" title="Tarifs de livraison" subtitle="Via Mondial Relay — Tarifs 2026, calculés selon le poids réel et le pays de destination." />
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 14 }}>
                 {/* France */}
                 <div style={{ background: T.greenLight, borderRadius: 12, padding: 16, border: `1px solid ${T.greenBorder}` }}>
