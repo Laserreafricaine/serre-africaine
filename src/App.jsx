@@ -761,7 +761,7 @@ function PaymentModal({ grandTotal, customer, onClose, onPaymentChosen }) {
           {[
             ["Bénéficiaire", "La Serre Africaine"],
             ["IBAN", "FR76 1513 5005 0004 1869 3447 026"],
-            ["Référence", `Cmd-${customer?.nom?.toUpperCase() || "CLIENT"}`],
+            ["Référence", `Commande légumes — ${customer?.prenom || ""} ${customer?.nom?.toUpperCase() || "CLIENT"}`],
             ["Montant", `${amount} €`],
           ].map(([l, v]) => (
             <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #f0fdf4" }}>
