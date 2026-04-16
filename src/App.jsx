@@ -78,6 +78,20 @@ const STOCK_INFO = {
   feuilles_bissap: { stockLeft: 5,  maxStock: 10 },
 };
 
+
+// ─── Liste des pays (Mondial Relay uniquement) ────────────────────────────────
+const PAYS_LIST = [
+  { value: "France",     label: "🇫🇷 France",     zone: "fr"    },
+  { value: "Belgique",   label: "🇧🇪 Belgique",    zone: "zone1" },
+  { value: "Luxembourg", label: "🇱🇺 Luxembourg",  zone: "zone1" },
+  { value: "Espagne",    label: "🇪🇸 Espagne",     zone: "zone2" },
+  { value: "Italie",     label: "🇮🇹 Italie",      zone: "zone2" },
+  { value: "Portugal",   label: "🇵🇹 Portugal",    zone: "zone3" },
+  { value: "Pologne",    label: "🇵🇱 Pologne",     zone: "zone3" },
+  { value: "Pays-Bas",   label: "🇳🇱 Pays-Bas",    zone: "zone3" },
+  { value: "autre",      label: "🌍 Autre pays — nous contacter", zone: "other" },
+];
+
 // ─── Mondial Relay ────────────────────────────────────────────────────────────
 // Tarifs France métropolitaine (Point Relais, TTC 2026)
 const MR_RELAY_RATES_FR = [
@@ -112,14 +126,11 @@ const MR_RELAY_RATES_INTL = {
   ],
 };
 
-// Détection de la zone depuis le pays saisi (texte libre)
+// Détection de la zone depuis le pays sélectionné
 function getDeliveryZone(pays) {
   if (!pays) return "fr";
-  const p = pays.toLowerCase().trim();
-  if (p.includes("belg") || p.includes("luxembourg") || p.includes("luxe")) return "zone1";
-  if (p.includes("espagne") || p.includes("spain") || p.includes("italie") || p.includes("italy")) return "zone2";
-  if (p.includes("portug") || p.includes("polong") || p.includes("poland") || p.includes("pays-bas") || p.includes("pays bas") || p.includes("hollande") || p.includes("nether")) return "zone3";
-  return "fr"; // France par défaut
+  const found = PAYS_LIST.find((p) => p.value === pays);
+  return found ? found.zone : "fr";
 }
 
 function getMRRelayPrice(w, pays) {
@@ -130,6 +141,24 @@ function getMRRelayPrice(w, pays) {
   return b ? b.price : rates[rates.length - 1].price;
 }
 function getMRHomePrice(w, pays) { return getMRRelayPrice(w, pays) + MR_HOME_SURCHARGE; }
+
+// ─── Alerte commande hors zone ────────────────────────────────────────────────
+async function sendOutOfZoneAlert(payload) {
+  if (!SHEETS_WEBHOOK_URL || SHEETS_WEBHOOK_URL === "COLLE_TON_URL_ICI") return;
+  try {
+    const encoded = encodeURIComponent(JSON.stringify({ type: "hors_zone", ...payload }));
+    const url     = `${SHEETS_WEBHOOK_URL}?data=${encoded}`;
+    await new Promise((resolve) => {
+      const img = new Image();
+      img.onload  = resolve;
+      img.onerror = resolve;
+      img.src = url;
+    });
+    console.log("✅ Alerte hors zone envoyée");
+  } catch (err) {
+    console.warn("Alerte hors zone error:", err);
+  }
+}
 
 // ─── Produits & Packs ─────────────────────────────────────────────────────────
 const PRODUCTS = [
@@ -963,6 +992,46 @@ function PaymentSection() {
   );
 }
 
+
+// ─── Modal pays hors zone ─────────────────────────────────────────────────────
+function OutOfZoneModal({ onClose }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)" }} onClick={onClose} />
+      <div style={{ position: "relative", background: "#fff", borderRadius: 20, padding: 28, maxWidth: 420, width: "100%", textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+        <div style={{ fontSize: 52, marginBottom: 12 }}>🌍</div>
+        <h2 style={{ color: "#92400e", margin: "0 0 10px", fontSize: 20 }}>Livraison hors zone Europe</h2>
+        <p style={{ color: "#4b5563", fontSize: 14, lineHeight: 1.7, margin: "0 0 20px" }}>
+          La livraison Mondial Relay n'est pas disponible directement pour ce pays.<br />
+          Contactez-nous pour organiser votre commande sur-mesure !
+        </p>
+        <div style={{ background: "#f0fdf4", border: "1px solid #d1fae5", borderRadius: 12, padding: "16px", marginBottom: 16, display: "grid", gap: 10 }}>
+          <div style={{ fontSize: 13, color: "#166534", fontWeight: "bold" }}>📞 Contactez La Serre Africaine</div>
+          <a href="https://wa.me/33603908935" target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
+            <button type="button" style={{ background: "#25D366", color: "#fff", border: "none", borderRadius: 10, padding: "12px 20px", fontWeight: "bold", cursor: "pointer", fontSize: 14, width: "100%" }}>
+              💬 WhatsApp : +33 6 03 90 89 35
+            </button>
+          </a>
+          <a href="tel:+33603908935" style={{ textDecoration: "none" }}>
+            <button type="button" style={{ background: "#fff", color: "#1f7a3d", border: "2px solid #1f7a3d", borderRadius: 10, padding: "10px 20px", fontWeight: "bold", cursor: "pointer", fontSize: 14, width: "100%" }}>
+              📱 +33 6 03 90 89 35
+            </button>
+          </a>
+          <a href="mailto:monpotagermaison@gmail.com" style={{ textDecoration: "none" }}>
+            <button type="button" style={{ background: "#fff", color: "#1f7a3d", border: "2px solid #1f7a3d", borderRadius: 10, padding: "10px 20px", fontWeight: "bold", cursor: "pointer", fontSize: 14, width: "100%" }}>
+              ✉️ monpotagermaison@gmail.com
+            </button>
+          </a>
+        </div>
+        <button type="button" onClick={onClose}
+          style={{ background: "#f3f4f6", color: "#4b5563", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: "bold", cursor: "pointer", fontSize: 14, width: "100%" }}>
+          ← Choisir un autre pays
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
   // ─── Routing simple basé sur window.location.pathname ─────────────────────
@@ -996,6 +1065,8 @@ export default function App() {
   const [phoneNumber,      setPhoneNumber]      = useState("");
   const [toast,            setToast]            = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showOutOfZone,    setShowOutOfZone]    = useState(false);
+  const [outOfZonePays,    setOutOfZonePays]    = useState("");
   const toastTimer = useRef(null);
 
   const updateCustomer = useCallback((field, value) => setCustomer((prev) => ({ ...prev, [field]: value })), []);
@@ -1017,7 +1088,7 @@ export default function App() {
       customer.adresse.trim().length >= 5,
       /^\d{4,6}$/.test(customer.codePostal.trim()),
       customer.ville.trim().length >= 2,
-      customer.pays.trim().length >= 2,
+      customer.pays.trim().length >= 2, // sélecteur pays
     ].every(Boolean);
     return !fieldsOk || phoneNumber.replace(/\D/g, "").length < 7;
   }, [customer, phoneNumber]);
@@ -1047,6 +1118,7 @@ export default function App() {
         ::-webkit-scrollbar { height: 4px; } ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
       `}</style>
 
+      {showOutOfZone && <OutOfZoneModal onClose={() => setShowOutOfZone(false)} />}
       <Toast show={toast} />
       <FloatingWA />
       <CountdownBanner />
@@ -1225,10 +1297,31 @@ export default function App() {
                   ["adresse",    "Adresse",     (v) => v.trim().length >= 5],
                   ["codePostal", "Code postal", (v) => /^\d{4,6}$/.test(v.trim())],
                   ["ville",      "Ville",       (v) => v.trim().length >= 2],
-                  ["pays",       "Pays",        (v) => v.trim().length >= 2],
                 ].map(([field, ph, validate]) => (
                   <ValidatedInput key={field} placeholder={ph} value={customer[field]} onChange={(v) => updateCustomer(field, v)} validate={validate} />
                 ))}
+                {/* Sélecteur pays */}
+                <div>
+                  <select
+                    value={customer.pays}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "autre") {
+                        setShowOutOfZone(true);
+                        updateCustomer("pays", "France"); // reset to France
+                      } else {
+                        updateCustomer("pays", val);
+                      }
+                    }}
+                    style={{ padding: "11px 12px", fontSize: 14, borderRadius: 8, border: `1.5px solid ${customer.pays ? "#22c55e" : "#cbd5e1"}`, width: "100%", background: "#fff", cursor: "pointer" }}
+                  >
+                    <option value="">🌍 Sélectionnez votre pays</option>
+                    {PAYS_LIST.filter(p => p.zone !== "other").map((p) => (
+                      <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
+                    <option value="autre">🌍 Autre pays — nous contacter</option>
+                  </select>
+                </div>
                 <PhoneInput countryCode={countryCode} phoneNumber={phoneNumber} onCountryChange={setCountryCode} onPhoneChange={setPhoneNumber} />
               </div>
               {phoneNumber && (
