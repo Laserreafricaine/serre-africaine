@@ -760,7 +760,7 @@ function PaymentModal({ grandTotal, customer, onClose, onPaymentChosen }) {
           <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 10 }}>Coordonnées bancaires :</div>
           {[
             ["Bénéficiaire", "La Serre Africaine"],
-            ["IBAN", "FR76 XXXX XXXX XXXX XXXX XXXX XXX"], // ← remplace par ton vrai IBAN
+            ["IBAN", "FR76 1513 5005 0004 1869 3447 026"],
             ["Référence", `Cmd-${customer?.nom?.toUpperCase() || "CLIENT"}`],
             ["Montant", `${amount} €`],
           ].map(([l, v]) => (
@@ -770,7 +770,7 @@ function PaymentModal({ grandTotal, customer, onClose, onPaymentChosen }) {
             </div>
           ))}
           <div style={{ background: T.redLight, color: T.red, borderRadius: 8, padding: 8, marginTop: 10, fontSize: 12 }}>
-            ⚠️ Remplace l'IBAN ci-dessus par le tien dans App.jsx
+            BIC : CEPAFRPP513 — Caisse d'Épargne Grand Est Europe
           </div>
           <button type="button" onClick={() => onPaymentChosen("Virement")} style={{ border: "none", background: T.green, color: T.white, borderRadius: 10, padding: "11px", fontWeight: "bold", cursor: "pointer", width: "100%", fontSize: 14, marginTop: 12 }}>
             J'ai noté les coordonnées ✓
