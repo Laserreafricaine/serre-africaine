@@ -1066,7 +1066,6 @@ export default function App() {
   const [toast,            setToast]            = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showOutOfZone,    setShowOutOfZone]    = useState(false);
-  const [outOfZonePays,    setOutOfZonePays]    = useState("");
   const toastTimer = useRef(null);
 
   const updateCustomer = useCallback((field, value) => setCustomer((prev) => ({ ...prev, [field]: value })), []);
