@@ -34,7 +34,7 @@ const MR_HOME_SURCHARGE       = 3.0;
 
 // ⚠️  Colle ici l'URL de ton déploiement Google Apps Script
 // Exemple : "https://script.google.com/macros/s/XXXXX/exec"
-const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwg3uvJGbPI8ye4dC7I1-llPtqaTFv_jmZy7XIuk2pUIIe5a9F5nrzkflB3W6wsQ6rKsw/exec";
+const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbz4avq8h7WL6cvKsCzv6j5vsCKNG2kcv_NvrtdW5HVfFnS0jzp0e49hAkwvxse-Q-t_/exec";
 const SHEETS_TOKEN       = "LSA_BOUTIQUE_2026_xK9mPq";
 
 const PRO_WA_MESSAGE = encodeURIComponent(
@@ -300,26 +300,25 @@ const disBtn   = { background: "#d1d5db", color: T.white, border: "none", border
 
 // ─── Envoi commande vers Google Sheets ───────────────────────────────────────
 async function sendToSheets(payload) {
-  if (!SHEETS_WEBHOOK_URL || SHEETS_WEBHOOK_URL === "COLLE_TON_URL_ICI") {
-    console.warn("⚠️ SHEETS_WEBHOOK_URL non configurée");
-    return;
-  }
-  // Anti-spam : 1 envoi max par session navigateur
-  const sessionKey = "lsa_order_sent_" + (payload.orderRef || "");
-  if (sessionStorage.getItem("lsa_order_sent")) { return; }
+  if (!SHEETS_WEBHOOK_URL || SHEETS_WEBHOOK_URL === "COLLE_TON_URL_ICI") return;
   try {
     const encoded = encodeURIComponent(JSON.stringify(payload));
     const url     = `${SHEETS_WEBHOOK_URL}?token=${SHEETS_TOKEN}&data=${encoded}`;
-    // Méthode Image — la plus fiable avec Apps Script (contourne CORS)
+    // Méthode 1 : fetch no-cors
+    try {
+      await fetch(url, { method: "GET", mode: "no-cors", redirect: "follow" });
+      console.log("✅ Commande envoyée (fetch)");
+      return;
+    } catch(e1) {}
+    // Méthode 2 : Image (fallback)
     await new Promise((resolve) => {
       const img = new Image();
-      img.onload  = resolve;
-      img.onerror = resolve; // on résout même en cas d'erreur, c'est normal
+      img.onload = img.onerror = resolve;
       img.src = url;
     });
-    console.log("✅ Commande envoyée vers Google Sheets");
+    console.log("✅ Commande envoyée (image)");
   } catch (err) {
-    console.warn("Sheets error (non bloquant):", err);
+    console.warn("Sheets error:", err);
   }
 }
 
