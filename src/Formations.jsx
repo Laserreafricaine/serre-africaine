@@ -8,6 +8,7 @@ const WERO_NUMBER     = "06 59 01 25 99";
 const WAVE_NUMBER     = "+221 77 181 33 44";
 
 const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw_Qaqpsfz4pfjvY-hB8OE8X-6shBWTIAn1N5jdju0pH-CvTCdob8Kba_oMsmLzdvt53g/exec";
+const SHEETS_TOKEN       = "LSA_FORMATIONS_2026_yR7nWx";
 
 const COUNTRY_CODES = [
   { code: "+33",  flag: "🇫🇷", label: "France"        },
@@ -163,12 +164,15 @@ const card = {
 // ─── Envoi inscription vers Google Sheets ─────────────────────────────────────
 async function sendInscriptionToSheets(payload) {
   if (!SHEETS_WEBHOOK_URL || SHEETS_WEBHOOK_URL === "COLLE_TON_URL_ICI") return;
+  // Anti-spam : 1 envoi max par session
+  if (sessionStorage.getItem("lsa_inscription_sent")) { return; }
   try {
     const data    = { type: "inscription", ...payload };
     const encoded = encodeURIComponent(JSON.stringify(data));
-    const url     = `${SHEETS_WEBHOOK_URL}?data=${encoded}`;
+    const url     = `${SHEETS_WEBHOOK_URL}?token=${SHEETS_TOKEN}&data=${encoded}`;
     // Utilise fetch avec no-cors + redirect follow pour Apps Script
     await fetch(url, { method: "GET", mode: "no-cors", redirect: "follow" });
+    sessionStorage.setItem("lsa_inscription_sent", "1");
     console.log("✅ Inscription envoyée vers Google Sheets");
   } catch (err) {
     // Fallback : méthode Image

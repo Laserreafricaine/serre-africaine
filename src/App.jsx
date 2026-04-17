@@ -35,6 +35,7 @@ const MR_HOME_SURCHARGE       = 3.0;
 // ⚠️  Colle ici l'URL de ton déploiement Google Apps Script
 // Exemple : "https://script.google.com/macros/s/XXXXX/exec"
 const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyrfnrWvErokZhGmTRGw0k39h3l1nIxYCdBcr7XxlV4SygPrCRaZEQKMnNwYdjQTuQuKw/exec";
+const SHEETS_TOKEN       = "LSA_BOUTIQUE_2026_xK9mPq";
 
 const PRO_WA_MESSAGE = encodeURIComponent(
   `Bonjour La Serre Africaine,\n\nJe suis professionnel (restaurateur / épicerie / traiteur) et je souhaite discuter d'un approvisionnement régulier en légumes africains BIO.\n\nMerci !`
@@ -159,7 +160,7 @@ async function sendOutOfZoneAlert(payload) {
   if (!SHEETS_WEBHOOK_URL || SHEETS_WEBHOOK_URL === "COLLE_TON_URL_ICI") return;
   try {
     const encoded = encodeURIComponent(JSON.stringify({ type: "hors_zone", ...payload }));
-    const url     = `${SHEETS_WEBHOOK_URL}?data=${encoded}`;
+    const url     = `${SHEETS_WEBHOOK_URL}?token=${SHEETS_TOKEN}&data=${encoded}`;
     await new Promise((resolve) => {
       const img = new Image();
       img.onload  = resolve;
@@ -303,9 +304,12 @@ async function sendToSheets(payload) {
     console.warn("⚠️ SHEETS_WEBHOOK_URL non configurée");
     return;
   }
+  // Anti-spam : 1 envoi max par session navigateur
+  const sessionKey = "lsa_order_sent_" + (payload.orderRef || "");
+  if (sessionStorage.getItem("lsa_order_sent")) { return; }
   try {
     const encoded = encodeURIComponent(JSON.stringify(payload));
-    const url     = `${SHEETS_WEBHOOK_URL}?data=${encoded}`;
+    const url     = `${SHEETS_WEBHOOK_URL}?token=${SHEETS_TOKEN}&data=${encoded}`;
     // Méthode Image — la plus fiable avec Apps Script (contourne CORS)
     await new Promise((resolve) => {
       const img = new Image();
@@ -760,7 +764,7 @@ function PaymentModal({ grandTotal, customer, onClose, onPaymentChosen }) {
           <div style={{ fontWeight: "bold", color: T.greenDark, marginBottom: 10 }}>Coordonnées bancaires :</div>
           {[
             ["Bénéficiaire", "La Serre Africaine"],
-            ["IBAN", "FR76 1513 5005 0004 1869 3447 026"],
+            ["IBAN", "FR76 1513 5005 0004 1869 3447 026"], // affiché uniquement dans la section virement
             ["Référence", `Commande légumes — ${customer?.prenom || ""} ${customer?.nom?.toUpperCase() || "CLIENT"}`],
             ["Montant", `${amount} €`],
           ].map(([l, v]) => (
