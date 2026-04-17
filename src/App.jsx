@@ -34,7 +34,7 @@ const MR_HOME_SURCHARGE       = 3.0;
 
 // ⚠️  Colle ici l'URL de ton déploiement Google Apps Script
 // Exemple : "https://script.google.com/macros/s/XXXXX/exec"
-const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyrfnrWvErokZhGmTRGw0k39h3l1nIxYCdBcr7XxlV4SygPrCRaZEQKMnNwYdjQTuQuKw/exec";
+const SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwg3uvJGbPI8ye4dC7I1-llPtqaTFv_jmZy7XIuk2pUIIe5a9F5nrzkflB3W6wsQ6rKsw/exec";
 const SHEETS_TOKEN       = "LSA_BOUTIQUE_2026_xK9mPq";
 
 const PRO_WA_MESSAGE = encodeURIComponent(
